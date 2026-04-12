@@ -1,0 +1,26 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.eclipse/
+
+# Fabric/Loom
+run/
+remapped/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files from prepareBuild
+*.log
+src_*.zip
+build_error_*.log
+build_output.log
