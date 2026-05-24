@@ -9,7 +9,7 @@ A realistic surveying mod for Minecraft 1.21.1 (Fabric).
 - **Level Station** block — right-click to set occupy point.
 - Press **V** in SHOT mode to save shots → clean PNEZD CSV export (in Meters)
 - Press **H** to toggle HUD on/off
-- `/ss` commands for session management and status
+- `/lh` commands for session management and status
 
 ## Installation
 
