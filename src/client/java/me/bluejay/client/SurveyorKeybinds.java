@@ -19,31 +19,31 @@ public class SurveyorKeybinds {
 
     public static void register() {
         saveShotKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.levelleaded.save_shot",
+                "key.levelheaded.save_shot",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_V,
-                "category.levelleaded.general"
+                "category.levelheaded.general"
         ));
 
         toggleHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.levelleaded.toggle_hud",
+                "key.levelheaded.toggle_hud",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
-                "category.levelleaded.general"
+                "category.levelheaded.general"
         ));
 
         toggleShotKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.levelleaded.toggle_shot",
+                "key.levelheaded.toggle_shot",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_R,
-                "category.levelleaded.general"
+                "category.levelheaded.general"
         ));
 
         stickyDescriptionKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.levelleaded.sticky_description",
+                "key.levelheaded.sticky_description",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
-                "category.levelleaded.general"
+                "category.levelheaded.general"
         ));
 
         System.out.println("[LevelHeaded KEYBINDS] Keybinds registered successfully (V/H/R/K)");

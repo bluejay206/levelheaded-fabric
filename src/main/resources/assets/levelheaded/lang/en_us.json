@@ -1,0 +1,10 @@
+{
+  "item.levelheaded.rod": "Surveyor's Rod",
+  "item.levelheaded.scope2": "Survey Scope",
+  "block.levelheaded.transit": "Level Station",
+  "key.levelheaded.save_shot": "Save Survey Shot",
+  "key.levelheaded.toggle_hud": "Toggle HUD (H)",
+  "key.levelheaded.toggle_traverse": "Toggle Traverse Layer (L)",
+  "key.levelheaded.toggle_shot": "Toggle Survey Shot (R)",
+  "category.levelheaded.general": "LevelHeaded"
+}

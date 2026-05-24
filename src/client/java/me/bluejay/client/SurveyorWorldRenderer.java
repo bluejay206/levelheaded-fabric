@@ -1,4 +1,4 @@
-package me.bluejay.levelheaded.client;
+package me.bluejay.client;
 
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;

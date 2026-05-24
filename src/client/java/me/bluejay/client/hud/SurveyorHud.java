@@ -1,6 +1,6 @@
 package me.bluejay.client.hud;
 
-import me.bluejay.client.levelheaded.ClientTransitCache;
+import me.bluejay.client.ClientTransitCache;
 import me.bluejay.client.data.SurveyPoint;
 import me.bluejay.client.data.SurveyPointManager;
 import me.bluejay.levelheaded.math.SurveyMath;

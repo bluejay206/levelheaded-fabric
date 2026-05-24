@@ -1,0 +1,109 @@
+{
+	"parent": "minecraft:block/block",
+	"credit": "LevelHeaded v0.2.5",
+	"textures": {
+		"particle": "levelheaded:block/transit_metal",
+		"metal": "levelheaded:block/transit_metal",
+		"head": "levelheaded:block/transit_head"
+	},
+	"elements": [
+		{
+			"name": "Tripod leg - North",
+			"from": [7, -2, 2],
+			"to": [9, 8, 4],
+			"rotation": {"angle": 22.5, "axis": "x", "origin": [8, 0, 7]},
+			"faces": {
+				"east": {"uv": [0, 0, 6, 2], "rotation": 90, "texture": "#metal"},
+				"south": {"uv": [0, 0, 2, 6], "texture": "#metal"},
+				"west": {"uv": [0, 0, 6, 2], "rotation": 270, "texture": "#metal"},
+				"up": {"uv": [0, 0, 2, 2], "texture": "#metal"},
+				"down": {"uv": [0, 0, 2, 2], "rotation": 180, "texture": "#metal"}
+			}
+		},
+		{
+			"name": "Tripod leg - South",
+			"from": [7, -1, 9],
+			"to": [9, 9, 11],
+			"rotation": {"angle": -22.5, "axis": "x", "origin": [8, 6, 9]},
+			"faces": {
+				"north": {"uv": [0, 0, 2, 6], "rotation": 180, "texture": "#metal"},
+				"east": {"uv": [0, 0, 6, 2], "rotation": 270, "texture": "#metal"},
+				"west": {"uv": [0, 0, 6, 2], "rotation": 90, "texture": "#metal"},
+				"up": {"uv": [0, 0, 2, 2], "rotation": 180, "texture": "#metal"},
+				"down": {"uv": [0, 0, 2, 2], "texture": "#metal"}
+			}
+		},
+		{
+			"name": "Tripod leg - East crossbar",
+			"from": [2, -2, 7],
+			"to": [4, 8, 9],
+			"rotation": {"angle": -22.5, "axis": "z", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [0, 0, 12, 2], "rotation": 90, "texture": "#metal"},
+				"east": {"uv": [0, 0, 12, 2], "rotation": 270, "texture": "#metal"},
+				"south": {"uv": [0, 0, 12, 2], "rotation": 270, "texture": "#metal"},
+				"up": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#metal"},
+				"down": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#metal"}
+			}
+		},
+		{
+			"name": "Tripod leg - West crossbar",
+			"from": [11, -4, 7],
+			"to": [13, 6, 9],
+			"rotation": {"angle": 22.5, "axis": "z", "origin": [2, 0, 8]},
+			"faces": {
+				"north": {"uv": [0, 0, 12, 2], "rotation": 90, "texture": "#metal"},
+				"east": {"uv": [0, 0, 12, 2], "rotation": 270, "texture": "#metal"},
+				"south": {"uv": [0, 0, 12, 2], "rotation": 270, "texture": "#metal"},
+				"up": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#metal"},
+				"down": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#metal"}
+			}
+		},
+		{
+			"name": "Instrument body - main housing",
+			"from": [5, 10, 5],
+			"to": [11, 14, 11],
+			"faces": {
+				"north": {"uv": [0, 0, 6, 4], "texture": "#head"},
+				"east": {"uv": [0, 0, 6, 4], "texture": "#head"},
+				"south": {"uv": [0, 0, 6, 4], "texture": "#head"},
+				"west": {"uv": [0, 0, 6, 4], "texture": "#head"},
+				"up": {"uv": [0, 0, 6, 6], "texture": "#head"},
+				"down": {"uv": [0, 0, 6, 6], "texture": "#head"}
+			}
+		},
+		{
+			"name": "Telescope tube - pointing north/south",
+			"from": [7, 11, 2],
+			"to": [9, 13, 14],
+			"faces": {
+				"north": {"uv": [0, 0, 2, 2], "texture": "#head"},
+				"east": {"uv": [0, 0, 12, 2], "texture": "#metal"},
+				"south": {"uv": [0, 0, 2, 2], "texture": "#head"},
+				"west": {"uv": [0, 0, 12, 2], "texture": "#metal"},
+				"up": {"uv": [0, 0, 2, 12], "texture": "#metal"},
+				"down": {"uv": [0, 0, 2, 12], "texture": "#metal"}
+			}
+		},
+		{
+			"name": "Leveling base plate",
+			"from": [4, 9, 4],
+			"to": [12, 10, 12],
+			"faces": {
+				"north": {"uv": [0, 0, 8, 1], "texture": "#metal"},
+				"east": {"uv": [0, 0, 8, 1], "texture": "#metal"},
+				"south": {"uv": [0, 0, 8, 1], "texture": "#metal"},
+				"west": {"uv": [0, 0, 8, 1], "texture": "#metal"},
+				"up": {"uv": [0, 0, 8, 8], "texture": "#metal"},
+				"down": {"uv": [0, 0, 8, 8], "texture": "#metal"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "transit",
+			"origin": [8, 8, 8],
+			"children": [0, 1, 2, 3, 4, 5, 6]
+		}
+	]
+}

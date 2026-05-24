@@ -1,4 +1,4 @@
-package me.bluejay.levelheaded.client;
+package me.bluejay.client;
 
 import me.bluejay.levelheaded.ModItems;
 import me.bluejay.client.hud.SurveyorHud;

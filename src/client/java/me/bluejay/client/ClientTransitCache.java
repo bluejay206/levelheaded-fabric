@@ -1,4 +1,4 @@
-package me.bluejay.client.levelheaded;
+package me.bluejay.client;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
