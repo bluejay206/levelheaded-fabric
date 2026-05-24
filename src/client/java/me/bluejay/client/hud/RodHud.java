@@ -1,7 +1,7 @@
 package me.bluejay.client.hud;
 
-import me.bluejay.ModItems;
-import me.bluejay.client.ClientTransitCache;
+import me.bluejay.levelheaded.ModItems;
+import me.bluejay.client.levelheaded.ClientTransitCache;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;

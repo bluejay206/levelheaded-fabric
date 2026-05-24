@@ -1,35 +1,30 @@
-package me.bluejay.client;
+package me.bluejay.levelheaded.client;
 
-import me.bluejay.ModItems;
-import me.bluejay.client.hud.RodHud;
-import me.bluejay.client.hud.ScopeHud;
+import me.bluejay.levelheaded.ModItems;
+import me.bluejay.client.hud.SurveyorHud;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
-import net.minecraft.item.Item;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 
 public class RodScopeHandler {
 
     public static void register() {
         UseItemCallback.EVENT.register((player, world, hand) -> {
-            if (world.isClient && hand == Hand.MAIN_HAND) {
-                Item held = player.getStackInHand(hand).getItem();
+            ItemStack stack = player.getStackInHand(hand);
 
-                if (held == ModItems.ROD || held == ModItems.SCOPE) {
-                    // Toggle between LIVE and SHOT mode
-                    if (held == ModItems.ROD) {
-                        RodHud rodHud = new RodHud(); // We need a better way - see note below
-                        rodHud.requestUpdate();
-                    } else {
-                        ScopeHud scopeHud = new ScopeHud();
-                        scopeHud.requestUpdate();
-                    }
-                    return TypedActionResult.success(player.getStackInHand(hand));
-                }
+            boolean isSurveyTool = stack.isOf(ModItems.ROD) || stack.isOf(ModItems.SCOPE2);
+
+            if (isSurveyTool && hand == Hand.MAIN_HAND) {
+                SurveyorHud.toggleMode();
+                return TypedActionResult.success(stack);
             }
-            return TypedActionResult.pass(player.getStackInHand(hand));
+
+            return TypedActionResult.pass(stack);
         });
+
+        System.out.println("[LevelHeaded] RodScopeHandler registered (ROD + SCOPE2)");
     }
 }

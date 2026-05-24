@@ -1,4 +1,4 @@
-# SurveyorSays
+# LevelHeaded
 
 A realistic surveying mod for Minecraft 1.21.1 (Fabric).
 
@@ -14,7 +14,7 @@ A realistic surveying mod for Minecraft 1.21.1 (Fabric).
 ## Installation
 
 1. Install **Fabric Loader 0.18.6+** for Minecraft 1.21.1
-2. Download the latest `.jar` from [Releases](https://github.com/bluejay206/surveyorsays-fabric/releases)
+2. Download the latest `.jar` from [Releases](https://github.com/bluejay206/LevelHeaded-fabric/releases)
 3. Place it in your `mods` folder
 
 ## Usage
@@ -33,9 +33,13 @@ A realistic surveying mod for Minecraft 1.21.1 (Fabric).
 - /ss clear         - Clear current session shots
 - /ss reset         - Clear transit point
 text
+
+## Known Issues
+- Scope uses placeholder of spyglass
+
 ## Downloads
 
-See the [Releases](https://github.com/bluejay206/surveyorsays-fabric/releases) page.
+See the [Releases](https://github.com/bluejay206/levelleaded-fabric/releases) page.
 
 ## License
 

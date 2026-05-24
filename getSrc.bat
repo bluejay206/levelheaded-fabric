@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 echo ========================================
-echo    SurveyorSays - Creating src.zip
+echo    LevelHeaded - Creating src.zip
 echo ========================================
 
 if exist src.zip (

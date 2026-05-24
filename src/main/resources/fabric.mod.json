@@ -1,23 +1,26 @@
 {
-	"schemaVersion": 1,
-	"id": "surveyorsays",
-	"version": "0.2.5",
-	"name": "SurveyorSays",
-	"description": "Surveying tools for Minecraft - rod, scope, HUD, and CSV export",
-	"authors": ["Bluejay"],
-	"contact": {},
-	"license": "CC0-1.0",
-	"icon": "assets/surveyorsays/icon.png",
-	"environment": "client",
-	"entrypoints": {
-		"main": ["me.bluejay.SurveyorSays"],
-		"client": ["me.bluejay.client.SurveyorSaysClient"]
-	},
-	"mixins": ["surveyorsays.mixins.json"],
-	"depends": {
-		"fabricloader": ">=0.16.9",
-		"minecraft": "~1.21.1",
-		"java": ">=21",
-		"fabric-api": "*"
-	}
+  "schemaVersion": 1,
+  "id": "levelheaded",
+  "version": "0.2.6",
+  "name": "LevelHeaded",
+  "description": "Surveying tools for Minecraft - rod, scope, HUD, and CSV export",
+  "authors": ["Bluejay"],
+  "contact": {},
+  "license": "CC0-1.0",
+  "icon": "assets/levelheaded/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": ["me.bluejay.levelheaded.LevelHeaded"],
+    "client": ["me.bluejay.client.LevelHeadedClient"]
+  },
+  "mixins": [
+    "levelheaded.mixins.json",
+    "levelheaded.client.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
 }

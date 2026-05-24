@@ -1,114 +1,119 @@
 package me.bluejay.client.data;
 
-import me.bluejay.math.SurveyMath;
-import net.fabricmc.loader.api.FabricLoader;
+import me.bluejay.levelheaded.math.SurveyMath;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
-
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Manages survey point recording and CSV export in PNEZD format.
+ */
 public class SurveyPointManager {
 
-    private static final AtomicInteger idCounter = new AtomicInteger(1);
-    private static final List<SurveyPoint> points = new ArrayList<>();
+    private static int currentPointNumber = 1;
+    private static File currentSessionFile;
 
-    private static String sessionPrefix = LocalDateTime.now()
-            .format(DateTimeFormatter.ofPattern("yyMMdd-HHmm"));
+    // Unit state (default METERS) - kept for HUD display only
+    private static SurveyPoint.Unit currentUnit = SurveyPoint.Unit.METERS;
 
-    private static Path currentCsvFile = FabricLoader.getInstance()
-            .getGameDir()
-            .resolve("surveys")
-            .resolve(sessionPrefix + "-survey_shots.csv");
+    private static File ensureSessionFile() {
+        File surveysDir = new File("surveys");
+        if (!surveysDir.exists()) {
+            boolean created = surveysDir.mkdirs();
+            System.out.println("[LevelHeaded] Created surveys directory: " + surveysDir.getAbsolutePath() + " (success=" + created + ")");
+        } else {
+            System.out.println("[LevelHeaded] Using existing surveys directory: " + surveysDir.getAbsolutePath());
+        }
 
-    private static boolean firstWrite = true;
+        if (currentSessionFile == null || !currentSessionFile.exists()) {
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+            currentSessionFile = new File(surveysDir, "surveyor_shots_" + timestamp + ".csv");
 
-    public static SurveyPoint addPoint(Vec3d occupyPoint, Vec3d shotPoint, SurveyMath.SurveyResult result, String source) {
-        if (result == null || shotPoint == null) return null;
+            try (FileWriter writer = new FileWriter(currentSessionFile)) {
+                MinecraftClient mc = MinecraftClient.getInstance();
+                long seed = 0L;
 
-        int id = idCounter.getAndIncrement();
-        String label = (source != null && !source.isBlank()) ? source : "Survey Shot";
+                if (mc.world != null) {
+                    if (mc.getServer() != null) {
+                        try {
+                            seed = mc.getServer().getOverworld().getSeed();
+                        } catch (Exception ignored) {}
+                    } else {
+                        seed = mc.world.hashCode();
+                    }
+                }
 
-        SurveyPoint point = new SurveyPoint(id, shotPoint, occupyPoint, result, label, LocalDateTime.now());
+                writer.append("LevelHeaded Survey Export\n");
+                writer.append("World Seed: " + seed + "\n");
+                writer.append("Date: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\n");
+                writer.append("\n");
+                writer.append("Point,Northing,Easting,Elevation,Description\n");
 
-        points.add(point);
-        appendSinglePointToCsv(point);
-
-        return point;
-    }
-
-    private static void appendSinglePointToCsv(SurveyPoint point) {
-        try {
-            Files.createDirectories(currentCsvFile.getParent());
-
-            String line = point.toPNEZD() + System.lineSeparator();
-            Files.writeString(currentCsvFile, line, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-
-            if (firstWrite) {
-                firstWrite = false;
-                showCsvCreatedMessage();
+                System.out.println("[LevelHeaded] ✅ New session CSV created: " + currentSessionFile.getAbsolutePath());
+                System.out.println("[LevelHeaded] Seed: " + seed);
+            } catch (IOException e) {
+                System.err.println("[LevelHeaded] ❌ Failed to create CSV: " + e.getMessage());
+                e.printStackTrace();
             }
+        }
+        return currentSessionFile;
+    }
+
+    public static void addPoint(Vec3d occupyPos, Vec3d shotPos, SurveyMath.SurveyResult result, String source, String description) {
+        if (result == null) {
+            System.out.println("[LevelHeaded] addPoint skipped - null result");
+            return;
+        }
+
+        String desc = (description == null || description.trim().isEmpty()) ? "Survey Shot" : description.trim();
+
+        try (FileWriter writer = new FileWriter(ensureSessionFile(), true)) {
+            writer.append(String.format("%d,%.3f,%.3f,%.3f,%s\n",
+                    currentPointNumber++,
+                    shotPos.z,   // Always meters (Northing)
+                    shotPos.x,   // Always meters (Easting)
+                    shotPos.y,   // Always meters (Elevation)
+                    desc));
+            System.out.println("[LevelHeaded] ✅ Shot saved to CSV (#" + (currentPointNumber-1) + ")");
         } catch (IOException e) {
-            System.err.println("[SurveyorSays] Failed to append point: " + e.getMessage());
+            System.err.println("[LevelHeaded] ❌ Failed to write shot to CSV: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private static void showCsvCreatedMessage() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
-            String fullPath = currentCsvFile.toAbsolutePath().toString();
-            client.player.sendMessage(
-                    Text.literal("§6[SurveyorSays] §aCSV created: §f" + fullPath),
-                    false
-            );
-        }
-    }
-
-    /** Called by /ss new command */
-    public static void startNewSession() {
-        sessionPrefix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMdd-HHmm"));
-        currentCsvFile = FabricLoader.getInstance()
-                .getGameDir()
-                .resolve("surveys")
-                .resolve(sessionPrefix + "-survey_shots.csv");
-
-        firstWrite = true;
-        idCounter.set(1);
-        points.clear();
-
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
-            client.player.sendMessage(
-                    Text.literal("§6[SurveyorSays] §aNew survey session started. Next shot will create a new CSV."),
-                    false
-            );
-        }
+    public static void addPoint(Vec3d occupyPos, Vec3d shotPos, SurveyMath.SurveyResult result, String source) {
+        addPoint(occupyPos, shotPos, result, source, null);
     }
 
     public static int getNextShotNumber() {
-        return idCounter.get();
+        return currentPointNumber;
     }
 
-    public static void shutdown() {
-        System.out.println("[SurveyorSays] Shutdown - " + points.size() + " points saved.");
+    public static void resetPointCounter() {
+        currentPointNumber = 1;
+        // Do NOT reset currentSessionFile → keeps appending to same CSV
     }
 
-    public static void clear() {
-        points.clear();
-        idCounter.set(1);
+    public static int getCurrentPointNumber() {
+        return currentPointNumber;
     }
 
-    public static List<SurveyPoint> getRecentShots(int count) {
-        if (points.isEmpty()) return List.of();
-        int start = Math.max(0, points.size() - count);
-        return points.subList(start, points.size());
+    public static SurveyPoint.Unit getCurrentUnitStatic() {
+        return currentUnit;
+    }
+
+    public static SurveyPoint.Unit getCurrentUnit() {
+        return getCurrentUnitStatic();
+    }
+
+    public static void setCurrentUnit(SurveyPoint.Unit unit) {
+        if (unit != null) {
+            currentUnit = unit;
+            // No new session on unit change
+        }
     }
 }

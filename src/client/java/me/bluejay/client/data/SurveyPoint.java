@@ -1,45 +1,68 @@
 package me.bluejay.client.data;
 
-import me.bluejay.math.SurveyMath;
+import me.bluejay.levelheaded.math.SurveyMath;
 import net.minecraft.util.math.Vec3d;
-
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public record SurveyPoint(
-        int id,
-        Vec3d position,
-        Vec3d occupyPoint,
+        int pointNumber,
+        Vec3d occupyPos,
+        Vec3d shotPos,
         SurveyMath.SurveyResult result,
+        String source,
         String description,
         LocalDateTime timestamp
 ) {
 
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+    public enum Unit {
+        METERS("Meters", 1.0, "m"),
+        FEET("Feet", 3.28084, "ft"),
+        CHAINS("Chains", 0.0497097, "ch");
 
-    public String toPNEZD() {
-        // Coord mode feature paused - using standard Minecraft PNEZD for now
-        double northing = -position.z;   // North = -Z
-        double easting = position.x;
-        double elevation = position.y;
+        public final String name;
+        public final double scale;
+        public final String symbol;
 
-        String desc = (description != null && !description.isBlank()) ? description : "Survey Shot";
-        desc = desc.replace(",", ";");
-
-        return String.format("%d,%.3f,%.3f,%.3f,%s", id, northing, easting, elevation, desc);
+        Unit(String name, double scale, String symbol) {
+            this.name = name;
+            this.scale = scale;
+            this.symbol = symbol;
+        }
     }
 
-    @Override
-    public String toString() {
-        // Clean output for /ss list command
-        double northing = -position.z;
-        double easting = position.x;
-        double elevation = position.y;
+    public SurveyPoint(
+            double occupyX, double occupyY, double occupyZ,
+            double shotX, double shotY, double shotZ,
+            SurveyMath.SurveyResult result,
+            String source,
+            String description) {
 
-        String desc = (description != null && !description.isBlank()) ? description : "Survey Shot";
-        String time = timestamp.format(TIME_FORMAT);
+        this(
+                SurveyPointManager.getNextShotNumber(),
+                new Vec3d(occupyX, occupyY, occupyZ),
+                new Vec3d(shotX, shotY, shotZ),
+                result,
+                source,
+                (description == null || description.trim().isEmpty()) ? "Survey Shot" : description.trim(),
+                LocalDateTime.now()
+        );
+    }
 
-        return String.format("§e#%d  §fN: %.2f  E: %.2f  Z: %.2f  §7%s §8(%s)",
-                id, northing, easting, elevation, desc, time);
+    public String toPNEZD() {
+        return String.format("%d,%.3f,%.3f,%.3f,%s",
+                pointNumber,
+                shotPos.z,   // Northing
+                shotPos.x,   // Easting
+                shotPos.y,   // Elevation
+                description
+        );
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public static SurveyPoint.Unit getCurrentUnit() {
+        return SurveyPointManager.getCurrentUnitStatic();
     }
 }

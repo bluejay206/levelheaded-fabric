@@ -17,7 +17,7 @@ public class SurveyorConfig {
     private static CoordMode coordMode = CoordMode.LOCAL;
 
     private static final Path CONFIG_PATH = FabricLoader.getInstance()
-            .getConfigDir().resolve("surveyorsays.properties");
+            .getConfigDir().resolve("levelleaded.properties");
 
     public static void load() { ... }
     public static void save() { ... }

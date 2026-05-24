@@ -1,0 +1,85 @@
+RULES.txt
+=================
+
+SURVEYORSAYS PROJECT - GLOBAL RULES
+These rules apply to the entire project and should be reviewed on every major change or ZIP upload.
+
+Core Philosophy
+---------------
+- The game world remains in METERS internally (Minecraft native scale).
+- Survey output (CSV + HUD) can be converted to feet or chains.
+- Prioritize stability and real surveying usability over visual flair.
+- Keep the mod lightweight and maintainable.
+
+Conversation Rules
+------------------
+- When away from keyboard, keep conversation high-level and code-free until I am back in front of the keybvoard, and can actually work with the code.  Save all changes in code and logic until these phases end, when they can be printed.
+
+Rendering Rules (Critical - Updated 2026-04-17)
+-----------------------------------------------
+
+- Never render 3D geometry directly from HUD callbacks (this causes VertexConsumer.next() issues and native crashes).
+- Use the VertexBuffer approach with AFTER_TRANSLUCENT + strong safety guards (60-frame delay, explicit shader, enableDepthTest/enableBlend, defaultBlendFunc).
+- Immediate-mode BufferBuilder chaining is fragile in 1.21.1 — avoid when possible.
+- Native LWJGL crashes (lwjgl_opengl.dll) are common on first frames; always use frame delay + GL state reset.
+
+Unit System Rules
+-----------------
+- Default output unit = METERS
+- Changing units via /ss units automatically starts a new CSV session
+- All distances, deltas, and cut/fill values must respect the current unit setting
+
+Build & Packaging Rules (Updated)
+---------------------------------
+- Always use prepareBuild.bat (it handles build numbering, ZIP naming, and logging)
+- Use -clear when experiencing compile or runtime issues (now kills java.exe processes and deletes run folder)
+- Use -norun when you only want to build without launching the game
+- Every build attempt is logged to Build_Status.csv
+- Manually delete .gradle/build/run if bat fails to clear locks
+
+Code Organization Rules
+-----------------------
+- Client-only rendering and HUD logic stays in the client/ source set
+- Server commands may use reflection to reach client classes when necessary
+- Keep TraverseLayer disabled until we have a stable VertexBuffer implementation
+- do not delete sections of code for the sake of efficiency or because "too much is going on here", like in prepareBuild.bat.  There is a specific script of steps there to automate much of this work.
+- Do not attempt to simplify HUD display, code and logic for efficiency without asking first, it has resulted in broken code logic
+- No aggressive simplification, this always results in deleted code and broken methods
+
+General Guardrails
+------------------
+- Test both singleplayer and multiplayer where possible
+- Keep Civil 3D compatibility in mind (clean PNEZD format, no breaking headers)
+- Document new commands and keybinds clearly
+- When in doubt, prioritize stability over new features
+- Any changes in code require full display of file with changes, no code snippets
+
+SURVEYORSAYS v0.2.6 - CURRENT VERSION RULES
+--------------------------------------------
+Current Feature Priorities (in order)
+1. Stable core (units, CSV with seed, clean headers)
+
+3. Live red traverse polyline (connecting saved shots in order)
+4. Sticky description system (D key, persists until changed)
+
+Temporary Guardrails
+--------------------
+- TraverseLayer.java must remain commented out until VertexBuffer implementation is stable
+- Do not add new rendering code to SurveyorHud.java
+- All world rendering must go through SurveyorWorldRenderer.java
+- Use -clear flag in prepareBuild.bat when changing rendering-related code
+- Toggle LIVE/SHOT key changed from F to T to avoid conflict with vanilla "Swap Hands"
+
+Known Issues to Watch
+---------------------
+- VertexConsumer.next() / BufferBuilder chaining problems in 1.21.1
+- Native LWJGL OpenGL crashes (lwjgl_opengl.dll) on first frames — mitigated with frame delay + GL state reset
+- Ensure Civil 3D can still import CSVs cleanly (ignore # comment lines)
+
+Next Major Goals
+----------------
+- Get 3-axis cursor working reliably (60-frame delay currently in place)
+- Re-implement live red traverse polyline using same VertexBuffer system
+- Add sticky description entry (D key)
+
+Last Updated: 2026-04-17

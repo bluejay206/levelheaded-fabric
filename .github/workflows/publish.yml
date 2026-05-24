@@ -49,7 +49,7 @@ jobs:
           curseforge-version-type: release
 
           # General
-          name: SurveyorSays ${{ github.event.release.tag_name }}
+          name: LevelHeaded ${{ github.event.release.tag_name }}
           version: ${{ github.event.release.tag_name }}
           changelog: ${{ github.event.release.body || 'No changelog provided.' }}
           files: build/libs/*.jar

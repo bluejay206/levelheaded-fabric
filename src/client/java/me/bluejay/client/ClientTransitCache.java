@@ -1,4 +1,4 @@
-package me.bluejay.client;
+package me.bluejay.client.levelheaded;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -9,7 +9,7 @@ public class ClientTransitCache {
 
     public static void setOccupyPos(BlockPos pos) {
         occupyPos = (pos != null) ? pos : BlockPos.ORIGIN;
-        System.out.println("[SurveyorSays] Client cache updated → " + occupyPos);
+        System.out.println("[LevelHeaded] Client cache updated → " + occupyPos);
     }
 
     public static BlockPos getOccupyPos() {

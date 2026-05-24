@@ -1,8 +1,11 @@
 package me.bluejay.client;
 
+import me.bluejay.levelheaded.ModItems;
+import me.bluejay.client.hud.DescriptionInputScreen;
 import me.bluejay.client.hud.SurveyorHud;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
@@ -11,39 +14,73 @@ public class SurveyorKeybinds {
 
     public static KeyBinding saveShotKey;
     public static KeyBinding toggleHudKey;
+    public static KeyBinding toggleShotKey;
+    public static KeyBinding stickyDescriptionKey;
 
     public static void register() {
-        // V - Save Shot
         saveShotKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.surveyorsays.save_shot",
+                "key.levelleaded.save_shot",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_V,
-                "category.surveyorsays.general"
+                "category.levelleaded.general"
         ));
 
-        // H - Toggle HUD on/off (changed from F to avoid switch hands conflict)
         toggleHudKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.surveyorsays.toggle_hud",
+                "key.levelleaded.toggle_hud",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
-                "category.surveyorsays.general"
+                "category.levelleaded.general"
         ));
 
-        // Tick handler for both keys
+        toggleShotKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.levelleaded.toggle_shot",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_R,
+                "category.levelleaded.general"
+        ));
+
+        stickyDescriptionKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.levelleaded.sticky_description",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_K,
+                "category.levelleaded.general"
+        ));
+
+        System.out.println("[LevelHeaded KEYBINDS] Keybinds registered successfully (V/H/R/K)");
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            // V key - Save current shot
-            while (saveShotKey.wasPressed()) {
-                if (SurveyorSaysClient.rodHud.getMode() == SurveyorHud.Mode.SHOT) {
-                    SurveyorSaysClient.rodHud.saveCurrentShotAndReset();
-                } else if (SurveyorSaysClient.scopeHud.getMode() == SurveyorHud.Mode.SHOT) {
-                    SurveyorSaysClient.scopeHud.saveCurrentShotAndReset();
+            if (client.player == null) return;
+
+            // V - Save shot
+            if (saveShotKey.wasPressed()) {
+                SurveyorHud.staticSaveCurrentShotAndReset();
+            }
+
+            // H - Toggle HUD
+            if (toggleHudKey.wasPressed()) {
+                SurveyorHud.staticToggleHud();
+            }
+
+            // R - Toggle SHOT mode
+            if (toggleShotKey.wasPressed()) {
+                boolean holdingRod = LevelHeadedClient.rodHud.isHoldingToolPublic(client.player);
+                boolean holdingScope2 = client.player.getMainHandStack().isOf(ModItems.SCOPE2);
+
+                if (holdingRod || holdingScope2) {
+                    if (holdingRod) {
+                        LevelHeadedClient.rodHud.requestUpdate();
+                    } else {
+                        LevelHeadedClient.scopeHud.requestUpdate();
+                    }
+                    SurveyorHud.toggleMode();
                 }
             }
 
-            // H key - Toggle entire HUD visibility
-            while (toggleHudKey.wasPressed()) {
-                SurveyorSaysClient.rodHud.toggleHud();
-                SurveyorSaysClient.scopeHud.toggleHud();
+            // K - Sticky Description (only in SHOT mode)
+            if (stickyDescriptionKey.wasPressed()) {
+                if (SurveyorHud.getMode() == SurveyorHud.Mode.SHOT) {
+                    MinecraftClient.getInstance().setScreen(new DescriptionInputScreen());
+                }
             }
         });
     }

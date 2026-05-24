@@ -1,11 +1,9 @@
 package me.bluejay.client.hud;
 
-import me.bluejay.ModItems;
-import me.bluejay.client.ClientTransitCache;
+import me.bluejay.levelheaded.ModItems;
+import me.bluejay.client.levelheaded.ClientTransitCache;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
@@ -13,7 +11,7 @@ public class ScopeHud extends SurveyorHud {
 
     @Override
     protected boolean isHoldingTool(PlayerEntity player) {
-        return player.getMainHandStack().isOf(ModItems.SCOPE);
+        return player.getMainHandStack().isOf(ModItems.SCOPE2);
     }
 
     @Override
@@ -26,8 +24,7 @@ public class ScopeHud extends SurveyorHud {
         Vec3d eyePos = player.getEyePos();
         Vec3d direction = player.getRotationVector();
 
-        // Long-range raycast (1000 blocks)
-        BlockHitResult hit = mc.world.raycast(new RaycastContext(
+        var hit = mc.world.raycast(new RaycastContext(
                 eyePos,
                 eyePos.add(direction.multiply(1000.0)),
                 RaycastContext.ShapeType.OUTLINE,
@@ -35,20 +32,12 @@ public class ScopeHud extends SurveyorHud {
                 player
         ));
 
-        if (hit.getType() == HitResult.Type.BLOCK) {
+        // CRITICAL: Only use hit position if we actually hit a block
+        // Otherwise return null → triggers "Out of range" in parent HUD
+        if (hit.getType() == net.minecraft.util.hit.HitResult.Type.BLOCK) {
             return hit.getPos();
+        } else {
+            return null;   // Sky / void / no hit → Out of range
         }
-
-        return null;   // Out of range or hitting sky
-    }
-
-    @Override
-    public void requestUpdate() {
-        // Only enter SHOT mode if we have a valid target
-        Vec3d moving = getMovingPosition(MinecraftClient.getInstance(), MinecraftClient.getInstance().player);
-        if (moving == null) {
-            return;   // Do not lock into SHOT mode when out of range
-        }
-        super.requestUpdate();
     }
 }
