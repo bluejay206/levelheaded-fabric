@@ -21,7 +21,7 @@ A realistic surveying mod for Minecraft 1.21.1 (Fabric).
 
 - Place a **Level Station** and right-click it to set the occupy point.
 - Hold the **Rod** or **Scope** → HUD appears automatically.
-- Right-click while holding the tool to lock a shot.
+- Press **R** while holding the tool to lock a shot.
 - Press **V** to save the shot to CSV.
 - Press **H** to hide/show the HUD.
 
