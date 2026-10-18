@@ -1,41 +1,29 @@
 # LevelHeaded
 
-A realistic surveying mod for Minecraft 1.21.1 (Fabric).
+Surveying tools for Minecraft 26.2 (Fabric). Version 0.30.
 
 ## Features
 
-- **Surveyor's Rod** and **Survey Scope** with real-time HUD
-- Bearing, Azimuth, Zenith Angle (0° = straight up), Slope Distance, Horizontal Distance, ΔN/ΔE, Cut/Fill
-- **Level Station** block — right-click to set occupy point.
-- Press **V** in SHOT mode to save shots → clean PNEZD CSV export (in Meters)
-- Press **H** to toggle HUD on/off
-- `/lh` commands for session management and status
+- Surveyor's Rod and Transit Station
+- Scope is the vanilla Spyglass: no occupy, it is vanilla; occupy set, the survey HUD and V save
+- Live HUD: bearing, azimuth, horizontal distance, ΔN/ΔE, cut/fill
+- Grid, ground, and geodesic scale, with Web Mercator, Equirectangular, and Equal Earth projections
+- `/lh` and client-only `/lhc` command trees
+- V saves the live shot to a PNEZD CSV (`shots_<timestamp>.csv`)
 
-## Installation
+## Requirements
 
-1. Install **Fabric Loader 0.18.6+** for Minecraft 1.21.1
-2. Download the latest `.jar` from [Releases](https://github.com/bluejay206/LevelHeaded-fabric/releases)
-3. Place it in your `mods` folder
+- Minecraft 26.2
+- Fabric Loader 0.19.3+
+- Fabric API
+- Java 25
 
 ## Usage
 
-- Place a **Level Station** and right-click it to set the occupy point.
-- Hold the **Rod** or **Scope** → HUD appears automatically.
-- Press **R** while holding the tool to lock a shot.
-- Press **V** to save the shot to CSV.
-- Press **H** to hide/show the HUD.
-
-## Commands
-- /lh help                        - Show command list
-- /lh new                         - Start a new CSV session
-- /lh status                      - Show current occupy point
-- /lh reset                       - Clear occupy point
-- /lh units <meters|feet|chains>  - Display units in HUD
-
-
-## Downloads
-
-See the [Releases](https://github.com/bluejay206/levelleaded-fabric/releases) page.
+- Place a Transit and right-click it to set the occupy point, or use `/lh occupy` / `/lhc occupy`.
+- Hold the Rod for a position shot, or the Spyglass for a raycast shot.
+- Press V to append the shot to the current CSV.
+- `/lh reset` or `/lhc reset` clears occupy and starts a new CSV on the next V.
 
 ## License
 
