@@ -54,7 +54,7 @@ Surveying tools for Minecraft 26.2 (Fabric). Version 0.30.
 
 Projection aliases: `wm` / `mercator` / `3857` for Web Mercator, `eqc` / `equirect` / `platecarree` for Equirectangular, `ee` / `eqearth` for Equal Earth.
 
-### `/lhc` (client only)
+### `/lhc` (client-only commands, if not running on a server)
 
 | Command | What it does |
 | --- | --- |
@@ -75,7 +75,7 @@ Projection aliases: `wm` / `mercator` / `3857` for Web Mercator, `eqc` / `equire
 
 | Key | Action |
 | --- | --- |
-| V | Save the live shot to `shots_<timestamp>.csv` (PNEZD: Point, Northing, Easting, Elevation, Description) |
+| V | Save the live shot displayed in HUD to `shots_<timestamp>.csv` (PNEZD: Point, Northing, Easting, Elevation, Description) |
 
 The CSV is written to `<gameDir>/levelheaded/`. The first V creates the file; later presses append. Reset starts a new file on the next V.
 
