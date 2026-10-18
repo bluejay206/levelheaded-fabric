@@ -1,13 +1,14 @@
 {
-	"required": true,
-	"compatibilityLevel": "JAVA_21",
-	"package": "me.bluejay.client.mixin",
-	"client": [
-		"Scope2FovMixin",
-		"Scope2MouseSensitivityMixin",
-		"Scope2MouseScrollMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	}
+  "required": true,
+  "package": "me.bluejay.levelheaded.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
 }

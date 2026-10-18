@@ -1,23 +1,32 @@
 package me.bluejay.levelheaded;
 
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
-public class ModItems {
+public final class ModItems {
 
-    public static final Item ROD = register("rod", new Item(new Item.Settings()));
+    public static final Item ROD = register("rod", new Item(new Item.Properties()
+            .setId(key("rod"))
+            .stacksTo(1)));
 
-    // Scope2 is now the only scope
-    public static final Item SCOPE2 = register("scope2", new Scope2Item(new Item.Settings()));
+    /** The survey scope is the vanilla spyglass. No custom item, no mixin. */
+    public static final Item SCOPE = Items.SPYGLASS;
 
     private static Item register(String name, Item item) {
-        Identifier id = Identifier.of(LevelHeaded.MOD_ID, name);
-        return Registry.register(Registries.ITEM, id, item);
+        return Registry.register(BuiltInRegistries.ITEM, LevelHeaded.id(name), item);
+    }
+
+    private static ResourceKey<Item> key(String name) {
+        return ResourceKey.create(Registries.ITEM, LevelHeaded.id(name));
     }
 
     public static void register() {
-        System.out.println("[LevelHeaded] Items registered (ROD + SCOPE2 only)");
+        // Static fields above force registration on class load.
+        // Creative tab is handled by ModTabs.
+        LevelHeaded.LOGGER.info("Items registered (ROD, vanilla SPYGLASS as scope)");
     }
 }
