@@ -17,4 +17,4 @@ rootProject.name = 'levelheaded'
 
 include 'core'
 include 'mc262'
-// include 'mc1211'   // enable once the 1.21.1 tree is brought in
+include 'mc1211'
