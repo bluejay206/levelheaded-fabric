@@ -8,205 +8,132 @@ echo ========================================
 :: Parse arguments
 set "NORUN=0"
 set "CLEAR=0"
+set "TARGET=mc262"
 
 for %%a in (%*) do (
     if /i "%%a" == "-norun" set NORUN=1
     if /i "%%a" == "-clear" set CLEAR=1
+    if /i "%%a" == "-1211" set TARGET=mc1211
+    if /i "%%a" == "-all" set TARGET=all
 )
 
-:: === NEW CLEANUP TASK - Archive old logs and zips ===
 echo [Cleanup] Archiving old build logs and source zips...
+if not exist old_errors mkdir old_errors
+if not exist old_builds mkdir old_builds
 
-:: Move build*.log files
 for %%f in (build_err*.log) do (
-    if exist "%%f" (
-        echo Moving %%f to old_errors\
-        move "%%f" old_errors\ >nul
-    )
+    if exist "%%f" move "%%f" old_errors\ >nul
 )
-
-:: Move src*.zip files (your source snapshots)
 for %%f in (src*.zip) do (
-    if exist "%%f" (
-        echo Moving %%f to old_builds\
-        move "%%f" old_builds\ >nul
-    )
+    if exist "%%f" move "%%f" old_builds\ >nul
 )
 
-echo [Cleanup] Done. Old files moved to old_errors\ and old_builds\
-
-:: === BUILD NUMBER MANAGEMENT ===
 set BUILD_NUM_FILE=build_number.txt
-if not exist %BUILD_NUM_FILE% (
-    echo 001 > %BUILD_NUM_FILE%
-)
+if not exist %BUILD_NUM_FILE% echo 000 > %BUILD_NUM_FILE%
 set /p BUILD_NUM=<%BUILD_NUM_FILE%
 set /a BUILD_NUM+=1
 set BUILD_NUM=000!BUILD_NUM!
 set BUILD_NUM=!BUILD_NUM:~-3!
 
-:: === TIMESTAMP ===
 for /f "tokens=2 delims==" %%a in ('wmic OS Get localdatetime /value') do set "dt=%%a"
 set "TIMESTAMP=%dt:~0,4%-%dt:~4,2%-%dt:~6,2% %dt:~8,2%:%dt:~10,2%:%dt:~12,2%"
 
-:: === READ VERSIONS ===
 for /f "tokens=2 delims==" %%a in ('findstr /b "mod_version=" gradle.properties') do set MOD_VERSION=%%a
-for /f "tokens=2 delims==" %%a in ('findstr /b "minecraft_version=" gradle.properties') do set MC_VERSION=%%a
-set FULL_MOD_VERSION=%MOD_VERSION%-b%BUILD_NUM%
-
-:: === GIT SHORT HASH ===
 set GIT_HASH=unknown
 if exist .git (
     for /f %%a in ('git rev-parse --short HEAD 2^>nul') do set GIT_HASH=%%a
 )
 
-:: === ZIP FILENAME with build number ===
 set "ZIPFILE=src_%dt:~2,6%_%dt:~8,4%_b%BUILD_NUM%.zip"
 set "LOGFILE=build_error_%dt:~2,6%_%dt:~8,4%.log"
 set "BUILDOUTPUT=build_output.log"
 
 echo Timestamp: %TIMESTAMP%
 echo Build number: %BUILD_NUM%
+echo Target: %TARGET%
 echo Target ZIP: %ZIPFILE%
 
 if %CLEAR%==1 (
-    echo Clearing .gradle, build, and run folders...
-
-    :: Kill any lingering Java processes (prevents lock issues)
+    echo Clearing .gradle and build folders...
     taskkill /f /im java.exe 2>nul
-
-    if exist .gradle (
-        rd /s /q .gradle 2>nul
-        echo .gradle folder deleted
-    )
-    if exist build (
-        rd /s /q build 2>nul
-        echo build folder deleted
-    )
-    if exist run (
-        rd /s /q run 2>nul
-        echo run folder deleted
-    )
-    echo Clearing complete.
+    if exist .gradle rd /s /q .gradle 2>nul
+    if exist build rd /s /q build 2>nul
+    if exist mc262\build rd /s /q mc262\build 2>nul
+    if exist mc1211\build rd /s /q mc1211\build 2>nul
+    if exist core\build rd /s /q core\build 2>nul
 )
 
-:: Delete old plain src.zip if it exists
 if exist src.zip del src.zip
 
-:: Clean previous build
 echo Running clean...
 call gradlew clean --quiet
 
-:: Run build
-echo Building project...
-call gradlew build > "%BUILDOUTPUT%" 2>&1
+if "%TARGET%"=="all" (
+    echo Building all targets...
+    call gradlew buildAll > "%BUILDOUTPUT%" 2>&1
+) else (
+    echo Building :%TARGET%...
+    call gradlew :%TARGET%:build > "%BUILDOUTPUT%" 2>&1
+)
 
 set BUILD_RESULT=fail
 if %errorlevel% equ 0 (
     set BUILD_RESULT=pass
     echo [SUCCESS] Build completed successfully.
 
-    if %NORUN%==0 (
+    if %NORUN%==0 if not "%TARGET%"=="all" (
         echo.
-        echo Launching Minecraft client for testing...
-        echo (Close the game window when done testing)
-        call gradlew runClient > run_output.log 2>&1
-    ) else (
-        echo.
-        echo -norun flag used. Skipping client launch.
+        echo Launching :%TARGET%:runClient...
+        call gradlew :%TARGET%:runClient > run_output.log 2>&1
     )
 ) else (
-    echo [BUILD FAILED] Errors detected.
+    echo [BUILD FAILED]
     copy "%BUILDOUTPUT%" "%LOGFILE%" >nul
-    echo Full error log saved as: %LOGFILE%
-    echo.
-    echo Last 40 lines:
-    echo ----------------------------------------
-    tail -n 40 "%BUILDOUTPUT%" 2>nul || type "%BUILDOUTPUT%"
-    echo ----------------------------------------
+    echo Full error log: %LOGFILE%
 )
 
-:: === CREATE / APPEND TO Build_Status.csv ===
 set CSVFILE=Build_Status.csv
 if not exist %CSVFILE% (
-    echo timestamp,build_number,build_result,zip_filename,mod_version,minecraft_version,git_short_hash > %CSVFILE%
+    echo timestamp,build_number,build_result,zip_filename,mod_version,target,git_short_hash > %CSVFILE%
 )
-echo %TIMESTAMP%,%BUILD_NUM%,%BUILD_RESULT%,%ZIPFILE%,%FULL_MOD_VERSION%,%MC_VERSION%,%GIT_HASH% >> %CSVFILE%
+echo %TIMESTAMP%,%BUILD_NUM%,%BUILD_RESULT%,%ZIPFILE%,%MOD_VERSION%,%TARGET%,%GIT_HASH% >> %CSVFILE%
 
-echo.
-echo Build logged to Build_Status.csv (build #%BUILD_NUM% - %BUILD_RESULT%)
-
-:: === CREATE ZIP (proper src/ structure + JAR) ===
-echo.
-echo Creating zip archive: %ZIPFILE%
+echo Creating zip: %ZIPFILE%
 powershell -NoProfile -Command ^
-"Compress-Archive -Path build.gradle, gradle.properties, settings.gradle, prepareBuild.bat, RULES.txt, 'src', 'run/surveys', 'src/main/resources/assets/levelleaded/texts/splashes.txt' -DestinationPath '%ZIPFILE%' -Force"
+"$items = @('build.gradle','gradle.properties','settings.gradle','prepareBuild.bat','README.md','RULES.txt','core','shared','mc262','mc1211'); $exist = $items | Where-Object { Test-Path $_ }; Compress-Archive -Path $exist -DestinationPath '%ZIPFILE%' -Force"
 
-:: === ADD COMPILED JAR ===
-if exist "build\libs\levelleaded-*.jar" (
-    echo Adding compiled mod JAR to zip...
-    powershell -NoProfile -Command "Compress-Archive -Path 'build\libs\levelleaded-*.jar' -DestinationPath '%ZIPFILE%' -Update"
-) else (
-    echo WARNING: No JAR found in build/libs/
-)
-
-:: === ADD FULL LOGS AND SCREENSHOTS TO THE ZIP ===
-echo Adding full console logs and screenshots to the ZIP...
-
-if exist run_output.log (
-    powershell -NoProfile -Command "Compress-Archive -Path 'run_output.log' -DestinationPath '%ZIPFILE%' -Update"
-)
-
-if exist "%BUILDOUTPUT%" (
-    powershell -NoProfile -Command "Compress-Archive -Path '%BUILDOUTPUT%' -DestinationPath '%ZIPFILE%' -Update"
-)
-
-if exist run\logs\latest.log (
-    powershell -NoProfile -Command "Compress-Archive -Path 'run\logs\latest.log' -DestinationPath '%ZIPFILE%' -Update"
-)
-
-if exist src (
-    powershell -NoProfile -Command "Compress-Archive -Path 'src' -DestinationPath '%ZIPFILE%' -Update"
-)
-
-if exist preparebuild.bat (
-    powershell -NoProfile -Command "Compress-Archive -Path 'preparebuild.bat' -DestinationPath '%ZIPFILE%' -Update"
-)
-
-:: Add all screenshots from run\screenshots
-if exist run\screenshots (
-    powershell -NoProfile -Command "Compress-Archive -Path 'run\screenshots\*.png' -DestinationPath '%ZIPFILE%' -Update" 2>nul
-)
-
-if %BUILD_RESULT%==fail (
-    if exist "%LOGFILE%" (
-        echo Appending failure log to zip...
-        powershell -NoProfile -Command ^
-        "Compress-Archive -Path '%LOGFILE%' -DestinationPath '%ZIPFILE%' -Update"
+:: jars
+for %%j in (mc262\build\libs\levelheaded-*.jar mc1211\build\libs\levelheaded-*.jar) do (
+    if exist "%%j" (
+        echo Adding %%j
+        powershell -NoProfile -Command "Compress-Archive -Path '%%j' -DestinationPath '%ZIPFILE%' -Update"
     )
 )
 
-:: Save new build number
-echo %BUILD_NUM% > %BUILD_NUM_FILE%
-
-:: Final status
-if exist "%ZIPFILE%" (
-    echo.
-    echo Success! Created %ZIPFILE%
-    echo Size: %~zZIPFILE% bytes
-    echo (Now includes: proper src/ folder + compiled .jar + logs + screenshots)
-) else (
-    echo ERROR: Failed to create zip file.
+:: shot CSVs from the 26.2 run dir
+if exist mc262\run\levelheaded\shots_*.csv (
+    powershell -NoProfile -Command "Get-ChildItem 'mc262\run\levelheaded\shots_*.csv' | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath '%ZIPFILE%' -Update }"
 )
 
-:: Cleanup temporary build files
+if exist "%BUILDOUTPUT%" powershell -NoProfile -Command "Compress-Archive -Path '%BUILDOUTPUT%' -DestinationPath '%ZIPFILE%' -Update"
+if exist run_output.log powershell -NoProfile -Command "Compress-Archive -Path 'run_output.log' -DestinationPath '%ZIPFILE%' -Update"
+if exist mc262\run\logs\latest.log powershell -NoProfile -Command "Compress-Archive -Path 'mc262\run\logs\latest.log' -DestinationPath '%ZIPFILE%' -Update"
+
+if %BUILD_RESULT%==fail if exist "%LOGFILE%" (
+    powershell -NoProfile -Command "Compress-Archive -Path '%LOGFILE%' -DestinationPath '%ZIPFILE%' -Update"
+)
+
+echo %BUILD_NUM% > %BUILD_NUM_FILE%
+
+if exist "%ZIPFILE%" (
+    echo Success: %ZIPFILE%
+) else (
+    echo ERROR: zip was not created.
+)
+
 if exist "%BUILDOUTPUT%" del "%BUILDOUTPUT%"
 if exist run_output.log del run_output.log
-
-:: Kill any lingering Java processes (prevents lock issues)
 taskkill /f /im java.exe 2>nul
 
 echo.
-echo Script completed.
-echo Build #%BUILD_NUM% (%BUILD_RESULT%) logged.
-echo All console output, screenshots, and CSV surveys have been added to the ZIP.
+echo Build #%BUILD_NUM% (%BUILD_RESULT%) target=%TARGET% logged.
