@@ -15,3 +15,5 @@ timestamp,build_number,overall,mc262,mc1211,zip_filename,mod_version,target,git_
 2026-11-07 14:42:06,007,pass,pass,pass,src_261107_1442_b007.zip,0.3.1,all,71e37de 
 2026-11-07 14:46:08,008,pass,pass,pass,src_261107_1446_b008.zip,0.3.1,all,71e37de 
 2026-11-07 14:51:17,001,pass,pass,pass,src_261107_1451_b001.zip,0.3.1,all,71e37de 
+2026-11-07 15:06:52,002,fail,pass,fail,src_261107_1506_b002.zip,0.3.1,all,f67c8b0 
+2026-11-07 15:08:57,003,pass,pass,pass,src_261107_1508_b003.zip,0.3.1,all,08b4012 
