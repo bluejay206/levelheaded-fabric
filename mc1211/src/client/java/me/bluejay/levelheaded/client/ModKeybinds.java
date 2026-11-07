@@ -1,6 +1,5 @@
 package me.bluejay.levelheaded.client;
 
-import me.bluejay.levelheaded.ShotDescription;
 import me.bluejay.levelheaded.SurveyInput;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -12,9 +11,8 @@ import org.lwjgl.glfw.GLFW;
 
 public final class ModKeybinds {
 
-    public static final KeyBinding.Category CATEGORY = KeyBinding.Category.create(
-            me.bluejay.levelheaded.LevelHeaded.id("levelheaded")
-    );
+    /** Yarn 1.21.1 uses a plain String category, not KeyBinding.Category. */
+    public static final String CATEGORY = "key.categories.levelheaded";
 
     public static KeyBinding ZOOM;
     public static KeyBinding SAVE_SHOT;

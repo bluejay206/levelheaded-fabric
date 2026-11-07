@@ -5,17 +5,18 @@ import me.bluejay.levelheaded.SurveyState;
 import me.bluejay.levelheaded.core.math.SurveyMath;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 
 /**
  * Captures the reading the HUD is showing when V is pressed.
+ * Does not listen for right-click, so the Scope spyglass use is left alone.
  */
 public final class ShotCapture {
 
     private ShotCapture() {}
 
+    /** Same target the HUD is showing right now. Returns false if nothing to log. */
     public static boolean captureLive() {
         MinecraftClient mc = MinecraftClient.getInstance();
         PlayerEntity player = mc.player;
@@ -28,23 +29,29 @@ public final class ShotCapture {
                 || player.getOffHandStack().isOf(ModItems.ROD);
 
         if (mode == ClientSurveyMode.HudMode.SCOPE || (mode == ClientSurveyMode.HudMode.OFF && holdingScope)) {
-            HitResult hit = LevelHeadedClientCommands.raycast();
-            if (hit == null || hit.getType() != HitResult.Type.BLOCK) return false;
-            var loc = ((BlockHitResult) hit).getBlockPos();
-            double x = loc.getX() + 0.5;
-            double y = loc.getY() + 0.5;
-            double z = loc.getZ() + 0.5;
-            SurveyMath.Result result = SurveyState.ENGINE.measure(x, y, z);
-            ShotLog.capture("scope", x, y, z, result, "");
-            return true;
+            return captureScope(player);
         }
-
         if (mode == ClientSurveyMode.HudMode.ROD || (mode == ClientSurveyMode.HudMode.OFF && holdingRod)) {
-            Vec3d pos = player.getPos();
-            SurveyMath.Result result = SurveyState.ENGINE.measure(pos.x, pos.y, pos.z);
-            ShotLog.capture("rod", pos.x, pos.y, pos.z, result, "");
-            return true;
+            return captureRod(player);
         }
-        return false;
+        // No item and HUD off: still log the rod reading (player vs occupy).
+        return captureRod(player);
+    }
+
+    private static boolean captureScope(PlayerEntity player) {
+        HitResult hit = LevelHeadedClientCommands.raycast();
+        if (hit == null || hit.getType() != HitResult.Type.BLOCK) return false;
+        // Exact raycast hit (fine-grained), not block center.
+        Vec3d loc = hit.getPos();
+        SurveyMath.Result result = SurveyState.ENGINE.scaledResult(loc.x, loc.y, loc.z);
+        ShotLog.capture("SCOPE", loc.x, loc.y, loc.z, result, "use");
+        return true;
+    }
+
+    private static boolean captureRod(PlayerEntity player) {
+        Vec3d pos = player.getPos();
+        SurveyMath.Result result = SurveyState.ENGINE.scaledResult(pos.x, pos.y, pos.z);
+        ShotLog.capture("ROD", pos.x, pos.y, pos.z, result, "use");
+        return true;
     }
 }

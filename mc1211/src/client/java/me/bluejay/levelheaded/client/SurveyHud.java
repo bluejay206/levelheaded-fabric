@@ -12,6 +12,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Vec3d;
 
 public final class SurveyHud {
 
@@ -40,10 +41,11 @@ public final class SurveyHud {
         if (clientMode == ClientSurveyMode.HudMode.SCOPE || (clientMode == ClientSurveyMode.HudMode.OFF && holdingScope)) {
             HitResult hit = LevelHeadedClientCommands.raycast();
             if (hit == null || hit.getType() != HitResult.Type.BLOCK) return;
-            var loc = ((BlockHitResult) hit).getBlockPos();
-            tx = loc.getX() + 0.5;
-            ty = loc.getY() + 0.5;
-            tz = loc.getZ() + 0.5;
+            // Use exact raycast hit position (fine-grained), not block center.
+            Vec3d pos = hit.getPos();
+            tx = pos.x;
+            ty = pos.y;
+            tz = pos.z;
             modeLabel = "SCOPE";
         } else if (clientMode == ClientSurveyMode.HudMode.ROD || (clientMode == ClientSurveyMode.HudMode.OFF && holdingRod)) {
             tx = player.getX();
@@ -54,7 +56,7 @@ public final class SurveyHud {
             return;
         }
 
-        SurveyMath.Result result = SurveyState.ENGINE.measure(tx, ty, tz);
+        SurveyMath.Result result = SurveyState.ENGINE.scaledResult(tx, ty, tz);
         Units unit = SurveyState.ENGINE.getUnits();
         String scaleTag = SurveyState.SCALE.hudTag();
 
@@ -69,7 +71,7 @@ public final class SurveyHud {
         lineList.add(String.format("[%s][%s]", modeLabel, scaleTag));
         lineList.add(angleLine);
         lineList.add(String.format("VA  %s", result.formatZenithDMS()));
-        lineList.add(String.format("Hz  %8.2f%s", result.horizontal(unit), unit.symbol()));
+        lineList.add(String.format("HD  %8.2f%s", result.horizontal(unit), unit.symbol()));
         lineList.add(String.format("ΔN  %8.2f", result.northing(unit)));
         lineList.add(String.format("ΔE  %8.2f", result.easting(unit)));
         String desc = ShotDescription.get();

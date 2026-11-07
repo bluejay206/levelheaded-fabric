@@ -5,7 +5,9 @@ plugins {
 
 version = project.mod_version
 group = project.maven_group
-archivesBaseName = project.archives_base_name + '-26.2'
+base {
+    archivesName = project.archives_base_name + '-26.2'
+}
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
