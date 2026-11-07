@@ -125,14 +125,7 @@ echo %TIMESTAMP%,%BUILD_NUM%,%OVERALL%,%RESULT_MC262%,%RESULT_MC1211%,%ZIPFILE%,
 
 echo.
 echo Creating zip: %ZIPFILE%
-powershell -NoProfile -Command ^
-"$dest = '%ZIPFILE%';" ^
-"if (Test-Path $dest) { Remove-Item $dest -Force };" ^
-"$items = @('build.gradle','gradle.properties','settings.gradle','prepareBuild.bat','README.md','RULES.txt','core','shared','mc262','mc1211');" ^
-"Get-ChildItem -Path $items -Recurse -File -ErrorAction SilentlyContinue |" ^
-"  Where-Object { $_.FullName -notmatch '\\build\\' -and $_.FullName -notmatch '\\.gradle\\' -and $_.FullName -notmatch '\\run\\' } |" ^
-"  ForEach-Object { $_.FullName } |" ^
-"  Compress-Archive -DestinationPath $dest -Force"
+powershell -NoProfile -Command "$dest = '%ZIPFILE%'; if (Test-Path $dest) { Remove-Item $dest -Force }; $items = @('build.gradle','gradle.properties','settings.gradle','prepareBuild.bat','README.md','RULES.txt','core','shared','mc262','mc1211'); Get-ChildItem -Path $items -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch '\\build\\' -and $_.FullName -notmatch '\\.gradle\\' -and $_.FullName -notmatch '\\run\\' } | ForEach-Object { $_.FullName } | Compress-Archive -DestinationPath $dest -Force"
 
 for %%j in (mc262\build\libs\levelheaded-*.jar mc1211\build\libs\levelheaded-*.jar) do (
     if exist "%%j" (
