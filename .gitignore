@@ -7,4 +7,4 @@ run/
 .idea/
 *.iml
 out/
-levelheaded/
+src*.zip
