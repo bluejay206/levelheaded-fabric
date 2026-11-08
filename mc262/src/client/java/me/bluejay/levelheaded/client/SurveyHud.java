@@ -112,7 +112,7 @@ public final class SurveyHud {
 
         for (int i = 0; i < lines.length; i++) {
             int color = (i == lines.length - 1) ? cutFillColor : 0xFFFFFFFF;
-            graphics.text(client.font, lines[i], x + padding, y + padding + i * lineHeight, color, true);
+            graphics.text(client.font, lines[i], x + padding, y + padding + i * lineHeight, color);
         }
     }
 }

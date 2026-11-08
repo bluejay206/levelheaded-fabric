@@ -14,6 +14,7 @@ for %%a in (%*) do (
     if /i "%%a" == "-norun" set NORUN=1
     if /i "%%a" == "-clear" set CLEAR=1
     if /i "%%a" == "-1211" set TARGET=mc1211
+    if /i "%%a" == "-263" set TARGET=mc263
     if /i "%%a" == "-all" set TARGET=all
 )
 
@@ -60,6 +61,7 @@ if %CLEAR%==1 (
     if exist .gradle rd /s /q .gradle 2>nul
     if exist build rd /s /q build 2>nul
     if exist mc262\build rd /s /q mc262\build 2>nul
+    if exist mc263\build rd /s /q mc263\build 2>nul
     if exist mc1211\build rd /s /q mc1211\build 2>nul
     if exist core\build rd /s /q core\build 2>nul
 )
@@ -69,6 +71,7 @@ call gradlew clean --quiet
 
 set OVERALL=pass
 set RESULT_MC262=skip
+set RESULT_MC263=skip
 set RESULT_MC1211=skip
 
 if "%TARGET%"=="all" (
@@ -86,6 +89,19 @@ if "%TARGET%"=="all" (
     )
 
     echo.
+    echo ========== Building :mc263 ==========
+    set "LOG_MC263=build_mc263_%dt:~2,6%_%dt:~8,4%_b%BUILD_NUM%.log"
+    call gradlew :mc263:build > "!LOG_MC263!" 2>&1
+    if !errorlevel! equ 0 (
+        set RESULT_MC263=pass
+        echo [mc263 SUCCESS]
+    ) else (
+        set RESULT_MC263=fail
+        set OVERALL=fail
+        echo [mc263 FAILED] log: !LOG_MC263!
+    )
+    echo.
+
     echo ========== Building :mc1211 ==========
     set "LOG_MC1211=build_mc1211_%dt:~2,6%_%dt:~8,4%_b%BUILD_NUM%.log"
     call gradlew :mc1211:build > "!LOG_MC1211!" 2>&1
@@ -119,41 +135,63 @@ if "%TARGET%"=="all" (
 
 set CSVFILE=Build_Status.csv
 if not exist %CSVFILE% (
-    echo timestamp,build_number,overall,mc262,mc1211,zip_filename,mod_version,target,git_short_hash > %CSVFILE%
+    echo timestamp,build_number,overall,mc262,mc263,mc1211,zip_filename,mod_version,target,git_short_hash > %CSVFILE%
 )
-echo %TIMESTAMP%,%BUILD_NUM%,%OVERALL%,%RESULT_MC262%,%RESULT_MC1211%,%ZIPFILE%,%MOD_VERSION%,%TARGET%,%GIT_HASH% >> %CSVFILE%
+echo %TIMESTAMP%,%BUILD_NUM%,%OVERALL%,%RESULT_MC262%,%RESULT_MC263%,%RESULT_MC1211%,%ZIPFILE%,%MOD_VERSION%,%TARGET%,%GIT_HASH% >> %CSVFILE%
 
 echo.
 echo Creating zip: %ZIPFILE%
-powershell -NoProfile -Command "$dest = '%ZIPFILE%'; if (Test-Path $dest) { Remove-Item $dest -Force }; $items = @('build.gradle','gradle.properties','settings.gradle','prepareBuild.bat','README.md','RULES.txt','core','shared','mc262','mc1211'); $files = Get-ChildItem -Path $items -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch '\\build\\' -and $_.FullName -notmatch '\\.gradle\\' -and $_.FullName -notmatch '\\run\\' } | Select-Object -ExpandProperty FullName -Unique; if ($files) { Compress-Archive -Path $files -DestinationPath $dest -Force }"
+set "STAGE=%TEMP%\lh_stage_%BUILD_NUM%"
+if exist "%STAGE%" rd /s /q "%STAGE%"
+mkdir "%STAGE%"
 
-for %%j in (mc262\build\libs\levelheaded-*.jar mc1211\build\libs\levelheaded-*.jar) do (
-    if exist "%%j" (
-        echo Adding %%j
-        powershell -NoProfile -Command "Compress-Archive -Path '%%j' -DestinationPath '%ZIPFILE%' -Update"
+:: Root files
+for %%f in (build.gradle gradle.properties settings.gradle prepareBuild.bat README.md RULES.txt) do (
+    if exist "%%f" copy /y "%%f" "%STAGE%\" >nul
+)
+
+:: Sources, one folder per project (exclude build, .gradle, run)
+for %%d in (core shared mc262 mc263 mc1211) do (
+    if exist "%%d" (
+        robocopy "%%d" "%STAGE%\%%d" /E /XD build .gradle run /NFL /NDL /NJH /NJS /NC /NS >nul
     )
 )
 
-if exist mc262\run\levelheaded\shots_*.csv (
-    powershell -NoProfile -Command "Get-ChildItem 'mc262\run\levelheaded\shots_*.csv' | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath '%ZIPFILE%' -Update }"
-)
-
-if exist mc1211\run\levelheaded\shots_*.csv (
-    powershell -NoProfile -Command "Get-ChildItem 'mc1211\run\levelheaded\shots_*.csv' | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath '%ZIPFILE%' -Update }"
-)
-
-for %%L in (build_*.log run_output.log) do (
-    if exist "%%L" (
-        powershell -NoProfile -Command "Compress-Archive -Path '%%L' -DestinationPath '%ZIPFILE%' -Update"
+:: Jars under each target's libs folder
+for %%t in (mc262 mc263 mc1211) do (
+    if exist "%%t\build\libs" (
+        mkdir "%STAGE%\%%t\libs" 2>nul
+        copy /y "%%t\build\libs\levelheaded-*.jar" "%STAGE%\%%t\libs\" >nul 2>&1
     )
 )
 
-if exist mc262\run\logs\latest.log (
-    powershell -NoProfile -Command "Compress-Archive -Path 'mc262\run\logs\latest.log' -DestinationPath '%ZIPFILE%' -Update"
+:: Build logs under each target's logs folder
+for %%t in (mc262 mc263 mc1211) do (
+    if exist "build_%%t_*.log" (
+        mkdir "%STAGE%\%%t\logs" 2>nul
+        copy /y "build_%%t_*.log" "%STAGE%\%%t\logs\" >nul 2>&1
+    )
 )
-if exist mc1211\run\logs\latest.log (
-    powershell -NoProfile -Command "Compress-Archive -Path 'mc1211\run\logs\latest.log' -DestinationPath '%ZIPFILE%' -Update"
+if exist run_output.log (
+    mkdir "%STAGE%\logs" 2>nul
+    copy /y run_output.log "%STAGE%\logs\" >nul
 )
+
+:: Shot CSVs and runtime logs under each target
+for %%t in (mc262 mc263 mc1211) do (
+    if exist "%%t\run\levelheaded\shots_*.csv" (
+        mkdir "%STAGE%\%%t\shots" 2>nul
+        copy /y "%%t\run\levelheaded\shots_*.csv" "%STAGE%\%%t\shots\" >nul 2>&1
+    )
+    if exist "%%t\run\logs\latest.log" (
+        mkdir "%STAGE%\%%t\logs" 2>nul
+        copy /y "%%t\run\logs\latest.log" "%STAGE%\%%t\logs\latest.log" >nul 2>&1
+    )
+)
+
+if exist "%ZIPFILE%" del /f /q "%ZIPFILE%"
+powershell -NoProfile -Command "Compress-Archive -Path '%STAGE%\*' -DestinationPath '%ZIPFILE%' -Force"
+rd /s /q "%STAGE%"
 
 echo %BUILD_NUM% > %BUILD_NUM_FILE%
 
@@ -167,6 +205,6 @@ if exist run_output.log del run_output.log
 taskkill /f /im java.exe 2>nul
 
 echo.
-echo Build #%BUILD_NUM% overall=%OVERALL%  mc262=%RESULT_MC262%  mc1211=%RESULT_MC1211%
+echo Build #%BUILD_NUM% overall=%OVERALL%  mc262=%RESULT_MC262%  mc263=%RESULT_MC263%  mc1211=%RESULT_MC1211%
 echo Per-target logs: build_<target>_<timestamp>_b%BUILD_NUM%.log
 echo Previous logs archived to old_logs\

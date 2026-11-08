@@ -17,4 +17,5 @@ rootProject.name = 'levelheaded'
 
 include 'core'
 include 'mc262'
+include 'mc263'
 include 'mc1211'

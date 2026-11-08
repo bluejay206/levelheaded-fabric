@@ -13,5 +13,5 @@ subprojects {
 tasks.register('buildAll') {
     group = 'build'
     description = 'Builds every version target.'
-    dependsOn(':mc262:build', ':mc1211:build')
+    dependsOn(':mc262:build', ':mc263:build', ':mc1211:build')
 }

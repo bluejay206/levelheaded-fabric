@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "levelheaded",
+  "version": "${version}",
+  "name": "LevelHeaded",
+  "description": "Surveying tools for Minecraft – rod, scope, transit station, and survey-grade measurements",
+  "authors": ["Bluejay"],
+  "contact": {},
+  "license": "CC0-1.0",
+  "icon": "assets/levelheaded/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.bluejay.levelheaded.LevelHeaded"
+    ],
+    "client": [
+      "me.bluejay.levelheaded.client.LevelHeadedClient"
+    ]
+  },
+  "mixins": [
+    "levelheaded.mixins.json",
+    {
+      "config": "levelheaded.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
