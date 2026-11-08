@@ -2,7 +2,6 @@ package me.bluejay.levelheaded.client;
 
 import me.bluejay.levelheaded.ModItems;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
