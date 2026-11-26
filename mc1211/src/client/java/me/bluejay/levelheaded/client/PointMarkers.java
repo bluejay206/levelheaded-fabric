@@ -4,6 +4,7 @@ import me.bluejay.levelheaded.PointLists;
 import me.bluejay.levelheaded.core.data.ControlPoint;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 
@@ -18,7 +19,18 @@ public final class PointMarkers {
     private PointMarkers() {}
 
     public static boolean visible() { return visible; }
-    public static void toggle() { visible = !visible; }
+
+    public static void toggle() {
+        visible = !visible;
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player != null && client.inGameHud != null) {
+            int count = PointLists.STORE.size();
+            String msg = visible
+                    ? "Markers on (" + count + " points)"
+                    : "Markers off";
+            client.inGameHud.setOverlayMessage(Text.literal(msg), false);
+        }
+    }
 
     public static void tick(MinecraftClient client) {
         if (!visible || client.world == null || client.player == null) return;
