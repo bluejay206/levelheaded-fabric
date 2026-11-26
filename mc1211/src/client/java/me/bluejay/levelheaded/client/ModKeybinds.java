@@ -58,7 +58,7 @@ public final class ModKeybinds {
         double northing = -s.toZ();
         double easting = s.toX();
         double elevation = s.toY();
-        String desc = ShotDescription.current();
+        String desc = ShotDescription.get();
         if (desc == null || desc.isBlank()) {
             desc = s.kind().equalsIgnoreCase("ROD") ? "rod" : "scope";
         }
