@@ -17,6 +17,8 @@ public final class ModKeybinds {
     public static KeyBinding SAVE_SHOT;
     public static KeyBinding TOGGLE_MARKERS;
 
+    private static boolean rawZWasDown;
+
     private ModKeybinds() {}
 
     public static void register() {
@@ -43,6 +45,12 @@ public final class ModKeybinds {
             while (TOGGLE_MARKERS.wasPressed()) {
                 PointMarkers.toggle();
             }
+            // Raw Z so we can tell if the key arrives at all.
+            boolean rawZ = InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_Z);
+            if (rawZ && !rawZWasDown) {
+                overlay(client, "Raw Z detected");
+            }
+            rawZWasDown = rawZ;
             PointMarkers.tick(client);
         });
     }
