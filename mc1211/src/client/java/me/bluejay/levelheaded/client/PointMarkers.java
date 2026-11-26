@@ -7,10 +7,6 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 
-/**
- * Spawns end-rod particles at each stored point. Toggle with Z.
- * Northing is stored as -z, so world z is -northing.
- */
 public final class PointMarkers {
 
     private static boolean visible;
@@ -22,12 +18,13 @@ public final class PointMarkers {
     public static void toggle() {
         visible = !visible;
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null && client.inGameHud != null) {
+        if (client.player != null) {
             int count = PointLists.STORE.size();
-            String msg = visible
-                    ? "Markers on (" + count + " points)"
-                    : "Markers off";
-            client.inGameHud.setOverlayMessage(Text.literal(msg), false);
+            String msg = visible ? "Markers on (" + count + " points)" : "Markers off";
+            client.player.sendMessage(Text.literal(msg), false);
+            if (client.inGameHud != null) {
+                client.inGameHud.setOverlayMessage(Text.literal(msg), false);
+            }
         }
     }
 
