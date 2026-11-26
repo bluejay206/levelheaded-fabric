@@ -3,13 +3,12 @@ package me.bluejay.levelheaded.client;
 import me.bluejay.levelheaded.PointLists;
 import me.bluejay.levelheaded.core.data.ControlPoint;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Vector3f;
 
 /**
- * Spawns a dust particle at each stored point. Toggle with Z.
+ * Spawns end-rod particles at each stored point. Toggle with Z.
  * Northing is stored as -z, so world z is -northing.
  */
 public final class PointMarkers {
@@ -40,10 +39,13 @@ public final class PointMarkers {
             double y = p.elevation();
             double z = -p.northing();
             if (eye.squaredDistanceTo(x, y, z) > 256 * 256) continue;
-            client.world.addParticle(
-                    new DustParticleEffect(new Vector3f(1.0f, 0.0f, 1.0f), 1.2f),
-                    true,
-                    x, y + 0.1, z, 0.0, 0.0, 0.0);
+            for (int i = 0; i < 4; i++) {
+                client.world.addParticle(
+                        ParticleTypes.END_ROD,
+                        true,
+                        x, y + 0.2 + i * 0.4, z,
+                        0.0, 0.02, 0.0);
+            }
         }
     }
 }
