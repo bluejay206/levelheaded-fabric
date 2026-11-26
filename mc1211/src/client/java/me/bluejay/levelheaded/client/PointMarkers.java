@@ -9,13 +9,11 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 
 /**
- * Draws a small box at each stored point. Toggle with Z.
- * Particles remain as a fallback for platforms without the render event.
+ * Draws a magenta box at each stored point. Toggle with Z.
  * Northing is stored as -z, so world z is -northing.
  */
 public final class PointMarkers {
@@ -56,28 +54,13 @@ public final class PointMarkers {
                 WorldRenderer.drawBox(
                         matrices, lines,
                         x - cam.x - 0.05, y - cam.y, z - cam.z - 0.05,
-                        x - cam.x + 0.05, y - cam.y + 1.0, z - cam.z + 0.05,
-                        1.0f, 1.0f, 1.0f, 1.0f);
+                        x - cam.x + 0.05, y - cam.y + 0.5, z - cam.z + 0.05,
+                        1.0f, 0.0f, 1.0f, 1.0f);
             }
         });
     }
 
-    /** Particle fallback. Used when the render event is unavailable. */
     public static void tick(MinecraftClient client) {
-        if (!visible || client.world == null || client.player == null) return;
-        Vec3d eye = client.player.getEyePos();
-        for (ControlPoint p : PointLists.STORE.list()) {
-            double x = p.easting();
-            double y = p.elevation();
-            double z = -p.northing();
-            if (eye.squaredDistanceTo(x, y, z) > 256 * 256) continue;
-            for (int i = 0; i < 4; i++) {
-                client.world.addParticle(
-                        ParticleTypes.END_ROD,
-                        true,
-                        x, y + 0.2 + i * 0.4, z,
-                        0.0, 0.02, 0.0);
-            }
-        }
+        // Particles removed. Overlay only.
     }
 }
