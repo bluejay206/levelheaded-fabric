@@ -1,11 +1,9 @@
 package me.bluejay.levelheaded.client;
 
 import me.bluejay.levelheaded.PointLists;
-import me.bluejay.levelheaded.ShotDescription;
-import me.bluejay.levelheaded.ShotRate;
-import me.bluejay.levelheaded.SurveyInput;
 import me.bluejay.levelheaded.core.data.ControlPoint;
 import me.bluejay.levelheaded.core.data.PointKind;
+import me.bluejay.levelheaded.core.data.ShotDescription;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
@@ -15,25 +13,15 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 public final class ModKeybinds {
-
-    /** Yarn 1.21.1 uses a plain String category, not KeyBinding.Category. */
     public static final String CATEGORY = "key.categories.levelheaded";
-
-    public static KeyBinding SET_DESCRIPTION;
-    public static KeyBinding SAVE_POINT;
+    public static KeyBinding SAVE_SHOT;
     public static KeyBinding TOGGLE_MARKERS;
 
     private ModKeybinds() {}
 
     public static void register() {
-        SET_DESCRIPTION = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.levelheaded.description",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_G,
-                CATEGORY
-        ));
-        SAVE_POINT = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.levelheaded.save_point",
+        SAVE_SHOT = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.levelheaded.save_shot",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_V,
                 CATEGORY
@@ -45,43 +33,18 @@ public final class ModKeybinds {
                 CATEGORY
         ));
 
-        SurveyInput.setListener(ModKeybinds::onAction);
+        PointMarkers.registerRender();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
-            if (SET_DESCRIPTION != null) {
-                while (SET_DESCRIPTION.wasPressed()) {
-                    SurveyInput.fire(SurveyInput.Action.SET_DESCRIPTION);
-                }
+            while (SAVE_SHOT.wasPressed()) {
+                saveToStore(client);
             }
-
-            if (TOGGLE_MARKERS != null) {
-                while (TOGGLE_MARKERS.wasPressed()) {
-                    PointMarkers.toggle();
-                }
+            while (TOGGLE_MARKERS.wasPressed()) {
+                PointMarkers.toggle();
             }
             PointMarkers.tick(client);
-
-            if (SAVE_POINT != null) {
-                while (SAVE_POINT.wasPressed()) { /* discard */ }
-                if (SAVE_POINT.isPressed() && rateAllows(client)) {
-                    SurveyInput.fire(SurveyInput.Action.SAVE_POINT);
-                }
-            }
         });
-    }
-
-    private static void onAction(SurveyInput.Action action) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null) return;
-        switch (action) {
-            case SET_DESCRIPTION -> {
-                if (client.currentScreen == null) {
-                    client.setScreen(new DescriptionScreen());
-                }
-            }
-            case SAVE_POINT -> saveToStore(client);
-        }
     }
 
     private static void saveToStore(MinecraftClient client) {
@@ -92,22 +55,16 @@ public final class ModKeybinds {
         ShotLog.Shot s = ShotLog.last();
         if (s == null) return;
         String id = PointLists.STORE.nextId();
-        // Same absolute coordinates the CSV uses: N = -Z, E = X, Z = Y.
         double northing = -s.toZ();
         double easting = s.toX();
         double elevation = s.toY();
-        String desc = ShotDescription.get();
-        if (desc.isEmpty()) desc = s.kind();
+        String desc = ShotDescription.current();
+        if (desc == null || desc.isBlank()) {
+            desc = s.kind().equalsIgnoreCase("ROD") ? "rod" : "scope";
+        }
         PointLists.STORE.put(new ControlPoint(id, PointKind.TOPO, northing, easting, elevation, desc));
-        JobStore.save();
-        overlay(client, "Saved point " + id + " → " + PointKind.TOPO);
-    }
-
-    private static boolean rateAllows(MinecraftClient client) {
-        if (client.world == null) return true;
-        float partial = client.getRenderTickCounter().getTickDelta(false);
-        double now = client.world.getTime() + partial;
-        return ShotRate.allow(now);
+        ShotLog.saveLast();
+        overlay(client, "Shot saved.");
     }
 
     private static void overlay(MinecraftClient client, String message) {
