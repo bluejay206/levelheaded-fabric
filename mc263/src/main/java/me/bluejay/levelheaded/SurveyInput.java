@@ -13,8 +13,10 @@ public final class SurveyInput {
     public enum Action {
         /** Open the description field for the next shot. */
         SET_DESCRIPTION,
-        /** Save the live shot. */
-        SAVE_SHOT
+        /** Save the live shot to the CSV. */
+        SAVE_SHOT,
+        /** Save the live shot into the point list. */
+        SAVE_POINT
     }
 
     @FunctionalInterface

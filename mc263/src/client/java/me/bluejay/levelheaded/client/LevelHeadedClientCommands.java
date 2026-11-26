@@ -58,6 +58,7 @@ public final class LevelHeadedClientCommands {
                 .then(hudBranch())
                 .then(ClientCommands.literal("reset")
                         .executes(ctx -> {
+                            JobStore.clear();
                             SurveyState.resetSession();
                             ctx.getSource().sendFeedback(Component.literal("Occupy cleared. Next V starts a new CSV."));
                             return 1;
@@ -77,6 +78,7 @@ public final class LevelHeadedClientCommands {
                 .then(ClientCommands.literal("clear")
                         .executes(ctx -> {
                             SurveyState.ENGINE.setOccupy(null);
+                            JobStore.save();
                             ctx.getSource().sendFeedback(Component.literal("Occupy cleared."));
                             return 1;
                         }));
@@ -149,6 +151,7 @@ public final class LevelHeadedClientCommands {
         }
         Vec3 pos = player.position();
         SurveyState.setOccupy(pos.x, pos.y, pos.z, "client");
+        JobStore.save();
         source.sendFeedback(Component.literal(String.format(
                 "Occupy set (client) to %.2f, %.2f, %.2f", pos.x, pos.y, pos.z)));
         return 1;

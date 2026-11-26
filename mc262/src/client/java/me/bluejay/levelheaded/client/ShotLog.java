@@ -85,6 +85,9 @@ public final class ShotLog {
     public static boolean hasLast() {
         return last != null;
     }
+    public static Shot last() {
+        return last;
+    }
 
     /** Append the last captured shot. Returns the shot number, or -1 if none. */
     public static int saveLast() {
@@ -175,7 +178,11 @@ public final class ShotLog {
 
     private static String csv(String raw) {
         if (raw == null) return "";
-        if (raw.indexOf(',') >= 0 || raw.indexOf('"') >= 0 || raw.indexOf('\n') >= 0) {
+        raw = raw.replace("\r", " ").replace("\n", " ");
+        if (!raw.isEmpty() && "=+-@".indexOf(raw.charAt(0)) >= 0) {
+            raw = "'" + raw;
+        }
+        if (raw.indexOf(',') >= 0 || raw.indexOf('"') >= 0) {
             return "\"" + raw.replace("\"", "\"\"") + "\"";
         }
         return raw;

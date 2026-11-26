@@ -19,6 +19,7 @@ public final class ModTabs {
             .displayName(Text.translatable("itemGroup.levelheaded"))
             .entries((params, output) -> {
                 output.add(ModItems.ROD);
+                output.add(ModItems.COLLECTOR);
                 output.add(ModItems.SCOPE);
                 output.add(ModBlocks.TRANSIT_ITEM);
             })

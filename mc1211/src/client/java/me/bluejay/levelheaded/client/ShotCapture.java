@@ -34,8 +34,8 @@ public final class ShotCapture {
         if (mode == ClientSurveyMode.HudMode.ROD || (mode == ClientSurveyMode.HudMode.OFF && holdingRod)) {
             return captureRod(player);
         }
-        // No item and HUD off: still log the rod reading (player vs occupy).
-        return captureRod(player);
+        // HUD not active: do not save.
+        return false;
     }
 
     private static boolean captureScope(PlayerEntity player) {

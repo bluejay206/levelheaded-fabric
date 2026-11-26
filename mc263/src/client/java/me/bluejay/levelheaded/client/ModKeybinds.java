@@ -1,8 +1,9 @@
 package me.bluejay.levelheaded.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import me.bluejay.levelheaded.LevelHeaded;
-import me.bluejay.levelheaded.SurveyInput;
+import me.bluejay.levelheaded.*;
+import me.bluejay.levelheaded.core.data.ControlPoint;
+import me.bluejay.levelheaded.core.data.PointKind;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
@@ -13,7 +14,7 @@ import net.minecraft.network.chat.Component;
  * Java binding for {@link SurveyInput}. Each action is one rebindable key.
  * Bedrock binds the same actions to a key or controller button.
  *
- * 26.3 uses SDL scancodes ({@link InputConstants}), not GLFW.
+ * 26.x uses SDL scancodes ({@link InputConstants}), not GLFW.
  */
 public final class ModKeybinds {
 
@@ -21,29 +22,30 @@ public final class ModKeybinds {
             LevelHeaded.id("assets/levelheaded")
     );
 
-    public static KeyMapping ZOOM;
-    public static KeyMapping SAVE_SHOT;
     public static KeyMapping SET_DESCRIPTION;
+    public static KeyMapping TOGGLE_MARKERS;
+    public static KeyMapping SAVE_POINT;
 
     private ModKeybinds() {}
 
     public static void register() {
-        ZOOM = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.levelheaded.zoom",
-                InputConstants.Type.KEYBOARD,
-                InputConstants.KEY_Z,
-                CATEGORY
-        ));
-        SAVE_SHOT = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.levelheaded.save_shot",
-                InputConstants.Type.KEYBOARD,
-                InputConstants.KEY_V,
-                CATEGORY
-        ));
+
         SET_DESCRIPTION = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.levelheaded.description",
                 InputConstants.Type.KEYBOARD,
                 InputConstants.KEY_G,
+                CATEGORY
+        ));
+        TOGGLE_MARKERS = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.levelheaded.markers",
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_Z,
+                CATEGORY
+        ));
+        SAVE_POINT = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.levelheaded.save_point",
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_V,
                 CATEGORY
         ));
 
@@ -56,14 +58,21 @@ public final class ModKeybinds {
                     SurveyInput.fire(SurveyInput.Action.SET_DESCRIPTION);
                 }
             }
-            if (SAVE_SHOT == null) return;
-            while (SAVE_SHOT.consumeClick()) {
-                SurveyInput.fire(SurveyInput.Action.SAVE_SHOT);
+            if (TOGGLE_MARKERS != null) {
+                while (TOGGLE_MARKERS.consumeClick()) {
+                    PointMarkers.toggle();
+                }
+            }
+            PointMarkers.tick(client);
+            if (SAVE_POINT != null) {
+                while (SAVE_POINT.consumeClick()) { /* discard */ }
+                if (SAVE_POINT.isDown() && rateAllows(client)) {
+                    SurveyInput.fire(SurveyInput.Action.SAVE_POINT);
+                }
             }
         });
     }
 
-    /** Java handler for the shared actions. */
     private static void onAction(SurveyInput.Action action) {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null) return;
@@ -73,14 +82,36 @@ public final class ModKeybinds {
                     client.gui.setScreen(new DescriptionScreen());
                 }
             }
-            case SAVE_SHOT -> {
-                if (!ShotCapture.captureLive()) {
-                    overlay(client, "No occupy set. Set occupy before saving.");
-                    return;
-                }
-                ShotLog.saveLast();
-            }
+            case SAVE_POINT -> saveToStore(client);
         }
+    }
+
+    private static void saveToStore(Minecraft client) {
+        if (!ShotCapture.captureLive()) {
+            overlay(client, "Invalid shot, not saved.");
+            return;
+        }
+        ShotLog.Shot s = ShotLog.last();
+        if (s == null) return;
+        String id = PointLists.STORE.nextId();
+        double northing = -s.toZ();
+        double easting = s.toX();
+        double elevation = s.toY();
+        String desc = ShotDescription.get();
+        if (desc.isEmpty()) desc = s.kind();
+        PointLists.STORE.put(new ControlPoint(id, PointKind.TOPO, northing, easting, elevation, desc));
+        JobStore.save();
+        overlay(client, "Saved point " + id + " → " + PointKind.TOPO);
+    }
+
+    private static boolean rateAllows(Minecraft client) {
+        if (client.level == null) return true;
+        float partial = 0f;
+        if (client.getDeltaTracker() != null) {
+            partial = client.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        }
+        double now = client.level.getGameTime() + partial;
+        return ShotRate.allow(now);
     }
 
     private static void overlay(Minecraft client, String message) {

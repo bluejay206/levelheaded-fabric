@@ -1,8 +1,13 @@
 {
-  "item.levelheaded.rod": "Surveyor's Rod",
+  "itemGroup.levelheaded": "LevelHeaded",
+  "item.levelheaded.rod": "Survey Rod",
+  "item.levelheaded.scope": "Survey Scope",
   "block.levelheaded.transit": "Transit Station",
-  "key.categories.levelheaded": "LevelHeaded",
-  "key.levelheaded.zoom": "Scope Zoom",
+  "item.levelheaded.transit": "Transit Station",
+  "item.levelheaded.collector": "Data Collector",,
+  "key.category.levelheaded.levelheaded": "LevelHeaded",
   "key.levelheaded.save_shot": "Save Shot",
-  "key.levelheaded.description": "Set Shot Description"
-}
+  "key.levelheaded.save_point": "Save Point",
+  "key.levelheaded.description": "Set Description",
+  "key.levelheaded.markers": "Toggle Point Markers"
+  }

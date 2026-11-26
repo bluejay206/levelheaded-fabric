@@ -8,15 +8,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-/**
- * Captures the reading the HUD is showing when V is pressed.
- * Does not listen for right-click, so the Scope spyglass use is left alone.
- */
 public final class ShotCapture {
 
     private ShotCapture() {}
 
-    /** Same target the HUD is showing right now. Returns false if nothing to log. */
     public static boolean captureLive() {
         var player = net.minecraft.client.Minecraft.getInstance().player;
         if (player == null || !SurveyState.hasOccupy()) return false;
@@ -33,8 +28,8 @@ public final class ShotCapture {
         if (mode == ClientSurveyMode.HudMode.ROD || (mode == ClientSurveyMode.HudMode.OFF && holdingRod)) {
             return captureRod(player);
         }
-        // No item and HUD off: still log the rod reading (player vs occupy).
-        return captureRod(player);
+        // HUD not active: do not save.
+        return false;
     }
 
     private static boolean captureScope(Player player) {
