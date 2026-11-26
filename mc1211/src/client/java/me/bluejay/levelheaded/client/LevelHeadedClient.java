@@ -9,15 +9,15 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.TypedActionResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * Client entry point.
+ * Registers the HUD, client commands, keybinds, and the data collector menu.
+ */
 public class LevelHeadedClient implements ClientModInitializer {
-    private static final Logger LOG = LoggerFactory.getLogger("levelheaded");
 
     @Override
     public void onInitializeClient() {
-        LOG.info("LevelHeaded client initializing");
         PointLists.setOnChange(JobStore::save);
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             String id;
@@ -35,6 +35,7 @@ public class LevelHeadedClient implements ClientModInitializer {
         SurveyHud.register();
         LevelHeadedClientCommands.register();
 
+        // Only intercept the collector. Everything else (including the spyglass) passes through.
         UseItemCallback.EVENT.register((player, world, hand) -> {
             ItemStack stack = player.getStackInHand(hand);
             if (stack.isOf(ModItems.COLLECTOR) && world.isClient()) {
@@ -43,6 +44,5 @@ public class LevelHeadedClient implements ClientModInitializer {
             }
             return TypedActionResult.pass(stack);
         });
-        LOG.info("LevelHeaded client ready");
     }
 }
