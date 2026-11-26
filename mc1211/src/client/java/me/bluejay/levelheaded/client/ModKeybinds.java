@@ -1,9 +1,9 @@
 package me.bluejay.levelheaded.client;
 
 import me.bluejay.levelheaded.PointLists;
+import me.bluejay.levelheaded.ShotDescription;
 import me.bluejay.levelheaded.core.data.ControlPoint;
 import me.bluejay.levelheaded.core.data.PointKind;
-import me.bluejay.levelheaded.core.data.ShotDescription;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
