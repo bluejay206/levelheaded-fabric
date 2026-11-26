@@ -42,9 +42,11 @@ public final class ModKeybinds {
             while (SAVE_SHOT.wasPressed()) {
                 saveToStore(client);
             }
-            // KeyBinding.wasPressed never fires for Z. Use raw key.
+            // Plain Z only. Ctrl-Z is reserved for ReGraded.
             boolean rawZ = InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_Z);
-            if (rawZ && !rawZWasDown) {
+            boolean ctrl = InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_CONTROL)
+                    || InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_RIGHT_CONTROL);
+            if (rawZ && !ctrl && !rawZWasDown) {
                 PointMarkers.toggle();
             }
             rawZWasDown = rawZ;
