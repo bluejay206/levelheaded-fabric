@@ -42,13 +42,10 @@ public final class ModKeybinds {
             while (SAVE_SHOT.wasPressed()) {
                 saveToStore(client);
             }
-            while (TOGGLE_MARKERS.wasPressed()) {
-                PointMarkers.toggle();
-            }
-            // Raw Z so we can tell if the key arrives at all.
+            // KeyBinding.wasPressed never fires for Z. Use raw key.
             boolean rawZ = InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_Z);
             if (rawZ && !rawZWasDown) {
-                overlay(client, "Raw Z detected");
+                PointMarkers.toggle();
             }
             rawZWasDown = rawZ;
             PointMarkers.tick(client);
