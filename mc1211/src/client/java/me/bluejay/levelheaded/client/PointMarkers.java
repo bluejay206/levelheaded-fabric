@@ -42,6 +42,7 @@ public final class PointMarkers {
             if (eye.squaredDistanceTo(x, y, z) > 256 * 256) continue;
             client.world.addParticle(
                     new DustParticleEffect(new Vector3f(1.0f, 0.0f, 1.0f), 1.2f),
+                    true,
                     x, y + 0.1, z, 0.0, 0.0, 0.0);
         }
     }
