@@ -62,7 +62,7 @@ public final class ModKeybinds {
             if (TOGGLE_MARKERS != null) {
                 while (TOGGLE_MARKERS.consumeClick()) {
                     // Plain Z only — leave Ctrl-Z for ReGraded
-                    if (!net.minecraft.client.gui.screens.Screen.hasControlDown()) {
+                    if (!client.hasControlDown()) {
                         PointMarkers.toggle();
                     }
                 }
