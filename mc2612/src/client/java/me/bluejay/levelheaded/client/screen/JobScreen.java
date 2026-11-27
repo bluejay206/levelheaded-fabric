@@ -47,7 +47,7 @@ public final class JobScreen extends Screen {
         add(x, y + 4 * (BTN_H + GAP), "Export", () -> askPath(true, this::doExport));
 
         this.addRenderableWidget(Button.builder(Component.literal("Back"),
-                        b -> this.minecraft.gui.setScreen(parent))
+                        b -> this.minecraft.setScreen(parent))
                 .bounds(x, y + 5 * (BTN_H + GAP) + 8, BTN_W, BTN_H)
                 .build());
     }
@@ -142,7 +142,7 @@ public final class JobScreen extends Screen {
     }
 
     private void askPath(boolean save, java.util.function.Consumer<Path> onChosen) {
-        this.minecraft.gui.setScreen(new PathScreen(this, save, onChosen));
+        this.minecraft.setScreen(new PathScreen(this, save, onChosen));
     }
 
     @Override
@@ -189,7 +189,7 @@ public final class JobScreen extends Screen {
                     .bounds(x, y + 28, 80, 20)
                     .build());
             this.addRenderableWidget(Button.builder(Component.literal("Cancel"),
-                            b -> this.minecraft.gui.setScreen(parent))
+                            b -> this.minecraft.setScreen(parent))
                     .bounds(x + 86, y + 28, 80, 20)
                     .build());
         }
@@ -200,10 +200,10 @@ public final class JobScreen extends Screen {
             try {
                 Path safe = confine(Path.of(text));
                 onChosen.accept(safe);
-                this.minecraft.gui.setScreen(parent);
+                this.minecraft.setScreen(parent);
             } catch (IOException e) {
                 parent.status = e.getMessage();
-                this.minecraft.gui.setScreen(parent);
+                this.minecraft.setScreen(parent);
             }
         }
 

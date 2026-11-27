@@ -25,11 +25,11 @@ public final class DataCollectorScreen extends Screen {
         int x = (this.width - BTN_W) / 2;
         int y = this.height / 2 - 40;
 
-        add(x, y, "Configuration", () -> this.minecraft.gui.setScreen(new ConfigScreen(this)));
+        add(x, y, "Configuration", () -> this.minecraft.setScreen(new ConfigScreen(this)));
         add(x, y + (BTN_H + GAP), "Points", () ->
-                this.minecraft.gui.setScreen(new PointsScreen(this, PointKind.TOPO, PointLists.STORE)));
+                this.minecraft.setScreen(new PointsScreen(this, PointKind.TOPO, PointLists.STORE)));
         add(x, y + 2 * (BTN_H + GAP), "Job", () ->
-                this.minecraft.gui.setScreen(new JobScreen(this)));
+                this.minecraft.setScreen(new JobScreen(this)));
 
         this.addRenderableWidget(Button.builder(Component.literal("Close"), b -> this.onClose())
                 .bounds(x, y + 3 * (BTN_H + GAP) + 8, BTN_W, BTN_H)

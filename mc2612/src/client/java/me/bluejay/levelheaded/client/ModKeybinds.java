@@ -79,8 +79,8 @@ public final class ModKeybinds {
         if (client.player == null) return;
         switch (action) {
             case SET_DESCRIPTION -> {
-                if (client.gui.screen() == null) {
-                    client.gui.setScreen(new DescriptionScreen());
+                if (client.screen == null) {
+                    client.setScreen(new DescriptionScreen());
                 }
             }
             case SAVE_POINT -> saveToStore(client);
@@ -116,8 +116,8 @@ public final class ModKeybinds {
     }
 
     private static void overlay(Minecraft client, String message) {
-        if (client.gui != null && client.gui.hud != null) {
-            client.gui.hud.setOverlayMessage(Component.literal(message), false);
+        if (client.gui != null) {
+            client.gui.setOverlayMessage(Component.literal(message), false);
         }
     }
 }

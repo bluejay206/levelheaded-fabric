@@ -190,8 +190,8 @@ public final class ShotLog {
 
     private static void feedback(String message) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.gui != null && mc.gui.hud != null) {
-            mc.gui.hud.setOverlayMessage(Component.literal(message), false);
+        if (mc.gui != null) {
+            mc.gui.setOverlayMessage(Component.literal(message), false);
         }
     }
 }

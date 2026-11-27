@@ -19,7 +19,7 @@ public final class SectionScreen extends Screen {
         int w = 160;
         int x = (this.width - w) / 2;
         int y = this.height / 2;
-        this.addRenderableWidget(Button.builder(Component.literal("Back"), b -> this.minecraft.gui.setScreen(parent))
+        this.addRenderableWidget(Button.builder(Component.literal("Back"), b -> this.minecraft.setScreen(parent))
                 .bounds(x, y, w, 20)
                 .build());
     }

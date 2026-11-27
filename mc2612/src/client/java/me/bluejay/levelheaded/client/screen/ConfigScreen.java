@@ -112,7 +112,7 @@ public final class ConfigScreen extends Screen {
         applyScroll();
 
         this.addRenderableWidget(Button.builder(Component.literal("Back"),
-                        b -> this.minecraft.gui.setScreen(parent))
+                        b -> this.minecraft.setScreen(parent))
                 .bounds(this.width / 2 - 50, this.height - 28, 100, 20)
                 .build());
     }

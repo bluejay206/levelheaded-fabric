@@ -2,6 +2,7 @@ package me.bluejay.levelheaded.client;
 
 import me.bluejay.levelheaded.PointLists;
 import me.bluejay.levelheaded.ShotDescription;
+import me.bluejay.levelheaded.ShotRate;
 import me.bluejay.levelheaded.core.data.ControlPoint;
 import me.bluejay.levelheaded.core.data.PointKind;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -12,20 +13,23 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
+import static me.bluejay.levelheaded.SurveyInput.Action.SAVE_POINT;
+
 public final class ModKeybinds {
     public static final String CATEGORY = "key.categories.levelheaded";
-    public static KeyBinding SAVE_SHOT;
+    public static KeyBinding SAVE_POINT;
     public static KeyBinding TOGGLE_MARKERS;
+    public static KeyBinding SET_DESCRIPTION;
 
     private static boolean rawZWasDown;
 
     private ModKeybinds() {}
 
     public static void register() {
-        SAVE_SHOT = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.levelheaded.save_shot",
+        SET_DESCRIPTION = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.levelheaded.description",
                 InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_V,
+                GLFW.GLFW_KEY_G,
                 CATEGORY
         ));
         TOGGLE_MARKERS = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -34,26 +38,39 @@ public final class ModKeybinds {
                 GLFW.GLFW_KEY_Z,
                 CATEGORY
         ));
+        SAVE_POINT = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.levelheaded.save_point",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_V,
+                CATEGORY
+        ));
 
         PointMarkers.registerRender();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
-            while (SAVE_SHOT.wasPressed()) {
-                saveToStore(client);
+            while (SET_DESCRIPTION.wasPressed()) {
+                if (client.currentScreen == null) {
+                    client.setScreen(new DescriptionScreen());
+                }
             }
-            // Plain Z only. Ctrl-Z is reserved for ReGraded.
-            boolean rawZ = InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_Z);
-            boolean ctrl = InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_CONTROL)
-                    || InputUtil.isKeyPressed(client.getWindow().getHandle(), GLFW.GLFW_KEY_RIGHT_CONTROL);
-            if (rawZ && !ctrl && !rawZWasDown) {
+            while (TOGGLE_MARKERS.wasPressed()) {
                 PointMarkers.toggle();
             }
-            rawZWasDown = rawZ;
             PointMarkers.tick(client);
+            while (SAVE_POINT.wasPressed()) { /* discard */ }
+            if (SAVE_POINT.isPressed() && rateAllows(client)) {
+                saveToStore(client);
+            }
         });
     }
 
+    private static boolean rateAllows(MinecraftClient client) {
+        if (client.world == null) return true;
+        float partial = client.getRenderTickCounter().getTickDelta(false);
+        double now = client.world.getTime() + partial;
+        return ShotRate.allow(now);
+    }
     private static void saveToStore(MinecraftClient client) {
         if (!ShotCapture.captureLive()) {
             overlay(client, "Invalid shot, not saved.");

@@ -33,7 +33,7 @@ public final class LevelHeadedClient implements ClientModInitializer {
         // Only intercept the collector. Everything else (including the spyglass) passes through.
         UseItemCallback.EVENT.register((player, world, hand) -> {
             if (player.getItemInHand(hand).is(ModItems.COLLECTOR) && world.isClientSide()) {
-                Minecraft.getInstance().gui.setScreen(new DataCollectorScreen());
+                Minecraft.getInstance().setScreen(new DataCollectorScreen());
                 return InteractionResult.SUCCESS;
             }
             return InteractionResult.PASS;

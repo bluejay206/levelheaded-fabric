@@ -65,7 +65,7 @@ public final class PointsScreen extends Screen {
         int x = this.width / 2 - 120;
         int y = this.height - 28;
         this.addRenderableWidget(Button.builder(Component.literal("Back"),
-                        b -> this.minecraft.gui.setScreen(parent))
+                        b -> this.minecraft.setScreen(parent))
                 .bounds(x, y, 70, 20)
                 .build());
         this.addRenderableWidget(Button.builder(Component.literal("Occupy"),

@@ -29,7 +29,7 @@ for %%f in (build_*.log run_output.log) do (
 )
 
 :: Move previous source zips into old_builds
-for %%f in (src*.zip) do (
+for %%f in (LH_src*.zip) do (
     if exist "%%f" move "%%f" old_builds\ >nul
 )
 
@@ -49,7 +49,7 @@ if exist .git (
     for /f %%a in ('git rev-parse --short HEAD 2^>nul') do set GIT_HASH=%%a
 )
 
-set "ZIPFILE=src_%dt:~2,6%_%dt:~8,4%_b%BUILD_NUM%.zip"
+set "ZIPFILE=LH_src_%dt:~2,6%_%dt:~8,4%_b%BUILD_NUM%.zip"
 
 echo Timestamp: %TIMESTAMP%
 echo Build number: %BUILD_NUM%
