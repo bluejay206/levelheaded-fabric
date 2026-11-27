@@ -14,6 +14,7 @@ for %%a in (%*) do (
     if /i "%%a" == "-norun" set NORUN=1
     if /i "%%a" == "-clear" set CLEAR=1
     if /i "%%a" == "-1211" set TARGET=mc1211
+    if /i "%%a" == "-2612" set TARGET=mc2612
     if /i "%%a" == "-263" set TARGET=mc263
     if /i "%%a" == "-all" set TARGET=all
 )
@@ -60,6 +61,7 @@ if %CLEAR%==1 (
     taskkill /f /im java.exe 2>nul
     if exist .gradle rd /s /q .gradle 2>nul
     if exist build rd /s /q build 2>nul
+    if exist mc2612\build rd /s /q mc2612\build 2>nul
     if exist mc262\build rd /s /q mc262\build 2>nul
     if exist mc263\build rd /s /q mc263\build 2>nul
     if exist mc1211\build rd /s /q mc1211\build 2>nul
@@ -70,11 +72,25 @@ echo Running clean...
 call gradlew clean --quiet
 
 set OVERALL=pass
+set RESULT_MC2612=skip
 set RESULT_MC262=skip
 set RESULT_MC263=skip
 set RESULT_MC1211=skip
 
 if "%TARGET%"=="all" (
+    echo.
+    echo ========== Building :mc2612 ==========
+    set "LOG_MC2612=build_mc2612_%dt:~2,6%_%dt:~8,4%_b%BUILD_NUM%.log"
+    call gradlew :mc2612:build > "!LOG_MC2612!" 2>&1
+    if !errorlevel! equ 0 (
+        set RESULT_MC2612=pass
+        echo [mc2612 SUCCESS]
+    ) else (
+        set RESULT_MC2612=fail
+        set OVERALL=fail
+        echo [mc2612 FAILED] log: !LOG_MC2612!
+    )
+
     echo.
     echo ========== Building :mc262 ==========
     set "LOG_MC262=build_mc262_%dt:~2,6%_%dt:~8,4%_b%BUILD_NUM%.log"
@@ -135,9 +151,9 @@ if "%TARGET%"=="all" (
 
 set CSVFILE=Build_Status.csv
 if not exist %CSVFILE% (
-    echo timestamp,build_number,overall,mc262,mc263,mc1211,zip_filename,mod_version,target,git_short_hash > %CSVFILE%
+    echo timestamp,build_number,overall,mc2612,mc262,mc263,mc1211,zip_filename,mod_version,target,git_short_hash > %CSVFILE%
 )
-echo %TIMESTAMP%,%BUILD_NUM%,%OVERALL%,%RESULT_MC262%,%RESULT_MC263%,%RESULT_MC1211%,%ZIPFILE%,%MOD_VERSION%,%TARGET%,%GIT_HASH% >> %CSVFILE%
+echo %TIMESTAMP%,%BUILD_NUM%,%OVERALL%,%RESULT_MC2612%,%RESULT_MC262%,%RESULT_MC263%,%RESULT_MC1211%,%ZIPFILE%,%MOD_VERSION%,%TARGET%,%GIT_HASH% >> %CSVFILE%
 
 echo.
 echo Creating zip: %ZIPFILE%
@@ -151,14 +167,14 @@ for %%f in (build.gradle gradle.properties settings.gradle prepareBuild.bat READ
 )
 
 :: Sources, one folder per project (exclude build, .gradle, run)
-for %%d in (core shared mc262 mc263 mc1211) do (
+for %%d in (core shared mc2612 mc262 mc263 mc1211) do (
     if exist "%%d" (
         robocopy "%%d" "%STAGE%\%%d" /E /XD build .gradle run /NFL /NDL /NJH /NJS /NC /NS >nul
     )
 )
 
 :: Jars under each target's libs folder
-for %%t in (mc262 mc263 mc1211) do (
+for %%t in (mc2612 mc262 mc263 mc1211) do (
     if exist "%%t\build\libs" (
         mkdir "%STAGE%\%%t\libs" 2>nul
         copy /y "%%t\build\libs\levelheaded-*.jar" "%STAGE%\%%t\libs\" >nul 2>&1
@@ -166,7 +182,7 @@ for %%t in (mc262 mc263 mc1211) do (
 )
 
 :: Build logs under each target's logs folder
-for %%t in (mc262 mc263 mc1211) do (
+for %%t in (mc2612 mc262 mc263 mc1211) do (
     if exist "build_%%t_*.log" (
         mkdir "%STAGE%\%%t\logs" 2>nul
         copy /y "build_%%t_*.log" "%STAGE%\%%t\logs\" >nul 2>&1
@@ -178,7 +194,7 @@ if exist run_output.log (
 )
 
 :: Shot CSVs and runtime logs under each target
-for %%t in (mc262 mc263 mc1211) do (
+for %%t in (mc2612 mc262 mc263 mc1211) do (
     if exist "%%t\run\levelheaded\shots_*.csv" (
         mkdir "%STAGE%\%%t\shots" 2>nul
         copy /y "%%t\run\levelheaded\shots_*.csv" "%STAGE%\%%t\shots\" >nul 2>&1
@@ -205,6 +221,6 @@ if exist run_output.log del run_output.log
 taskkill /f /im java.exe 2>nul
 
 echo.
-echo Build #%BUILD_NUM% overall=%OVERALL%  mc262=%RESULT_MC262%  mc263=%RESULT_MC263%  mc1211=%RESULT_MC1211%
+echo Build #%BUILD_NUM% overall=%OVERALL%  mc2612=%RESULT_MC2612%  mc262=%RESULT_MC262%  mc263=%RESULT_MC263%  mc1211=%RESULT_MC1211%
 echo Per-target logs: build_<target>_<timestamp>_b%BUILD_NUM%.log
 echo Previous logs archived to old_logs\
