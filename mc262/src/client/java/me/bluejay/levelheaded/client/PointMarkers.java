@@ -20,7 +20,7 @@ public final class PointMarkers {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.gui == null || client.gui.hud == null) return;
         int count = PointLists.STORE.size();
-        String msg = visible ? "Markers on (" + count + " points)" : "Markers off";
+        String msg = visible ? "LevelHeaded markers on (" + count + " points)" : "LevelHeaded markers off";
         client.gui.hud.setOverlayMessage(Component.literal(msg), false);
     }
 
